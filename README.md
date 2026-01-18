@@ -50,8 +50,22 @@ will be either downloaded (if they're stored) as a URL, or otherwise decoded (fr
 
 ## Prerequisites
 
-* Python 3 (tested on Python 3.10.4)
-* [LXML](https://lxml.de/)
+* Python 3.8 or higher (tested on Python 3.10.4)
+* [uv](https://github.com/astral-sh/uv) - Modern Python package installer and resolver
+
+## Installation
+
+Install dependencies using uv:
+
+```bash
+uv sync
+```
+
+Or if you prefer pip (requirements.txt is still provided for compatibility):
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Steps
 
