@@ -7,19 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-01-XX
+
+### Added
+- **SMS/MMS text message extraction** - New `sms-text` export type extracts all SMS text messages and MMS text bodies to CSV
+- **Enhanced call log fields** - Added read status, SIM slot, and call features to call log CSV output
+- **Memory-efficient XML parsing** - Upgraded call log generator to use `lxml.etree.iterparse()` for better performance and memory efficiency
+- **New module**: `sms_text_extractor.py` for extracting SMS/MMS text content
+- **Comprehensive VCF field parsing** - Full support for all vCard fields including birthdays, notes, and other metadata
+- **Comprehensive test suite** - Added tests for SMS/MMS text extraction (`test_sms_text_extractor.py`)
+- **Enhanced test coverage** - Updated call log tests to verify new fields (Read status, SIM slot, Features)
+- **CLI testing** - Added test for `sms-text` option in `test_xml_backup_exporter.py`
+
 ### Changed
 - **BREAKING**: Renamed command from `backup-extractor` to `xml-backup-exporter`
 - **BREAKING**: Renamed main module from `backup_extractor.py` to `xml_backup_exporter.py`
+- **Improved XML parsing**: Call log generator now uses `lxml.etree.iterparse()` instead of `xml.etree.ElementTree` for consistency and performance
 - Updated README with detailed description acknowledging original work by @raleighlittles
 - Added credits throughout source code and documentation
+- Updated CLI to support new `sms-text` backup type
+- Enhanced documentation across all source files:
+  - Added module docstrings explaining purpose and functionality
+  - Improved function docstrings with Args, Returns, and Examples
+  - Added usage examples in docstrings where helpful
+  - Better code comments for maintainability
 
-### Added
-- Comprehensive module-level docstrings for all source files
-- Detailed function documentation with Args, Returns, and Examples
-- Improved inline comments explaining complex logic
-- Package-level documentation in `__init__.py` with version information
-
-### Changed
+### Changed (from Unreleased)
 - **Refactored vCard/VCF parser** for improved maintainability and code quality
   - Replaced long if/elif chain with dispatch dictionary pattern
   - Improved error handling (replaced `sys.exit()` with proper exceptions)
@@ -27,11 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Better code organization with helper functions and clear separation of concerns
   - Enhanced type hints and documentation
   - Improved variable naming and code style
-- Enhanced documentation across all source files:
-  - Added module docstrings explaining purpose and functionality
-  - Improved function docstrings with detailed parameter descriptions
-  - Added usage examples in docstrings where helpful
-  - Better code comments for maintainability
 
 ### Fixed
 - Fixed potential index errors in multiline multimedia parsing

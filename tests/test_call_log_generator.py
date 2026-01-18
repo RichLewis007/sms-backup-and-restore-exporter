@@ -80,6 +80,11 @@ class TestCreateCallLog:
             assert rows[0]["Call type"] == "Incoming"  # type 1
             assert rows[0]["Caller name"] == "John Doe"
             assert rows[0]["Caller #"] == "+1234567890"
+            
+            # Verify all expected fields are present (including new ones)
+            assert "Read status" in rows[0]
+            assert "SIM slot" in rows[0]
+            assert "Features" in rows[0]
 
     def test_create_call_log_no_calls(self, temp_dir):
         """Test creating call log when no calls XML files exist."""
@@ -148,3 +153,46 @@ class TestCreateCallLog:
             assert rows[0]["Call type"] == "Missed"
             assert rows[0]["Call duration"] == "N/A"
             assert rows[0]["Call duration (s)"] == "N/A"
+            # Verify new fields are present
+            assert "Read status" in rows[0]
+            assert "SIM slot" in rows[0]
+            assert "Features" in rows[0]
+
+    def test_create_call_log_with_new_fields(self, temp_dir):
+        """Test that new call log fields (Read status, SIM slot, Features) are extracted."""
+        xml_content = """<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<calls count="2">
+    <call number="+1234567890" duration="120" date="1609459200000" type="1" 
+          readable_date="Jan 1, 2021 12:00:00 AM" contact_name="John Doe" 
+          read="1" subscription_id="1" presentation="1" />
+    <call number="+9876543210" duration="45" date="1609545600000" type="2" 
+          readable_date="Jan 2, 2021 12:00:00 AM" contact_name="Jane Smith" 
+          read="0" subscription_id="2" post_dial_digits="123" 
+          subscription_component_name="SIM2" />
+</calls>"""
+        
+        calls_dir = temp_dir / "calls_dir"
+        calls_dir.mkdir()
+        xml_file = calls_dir / "calls-enhanced.xml"
+        xml_file.write_text(xml_content)
+        
+        output_dir = temp_dir / "output"
+        output_dir.mkdir()
+        
+        create_call_log(str(calls_dir), str(output_dir))
+        
+        csv_file = output_dir / "call_log.csv"
+        with open(csv_file, 'r', newline='') as f:
+            reader = csv.DictReader(f)
+            rows = list(reader)
+            assert len(rows) == 2
+            
+            # Check first call with basic new fields
+            assert rows[0]["Read status"] == "1"
+            assert rows[0]["SIM slot"] == "1"
+            
+            # Check second call with all new fields including features
+            assert rows[1]["Read status"] == "0"
+            assert rows[1]["SIM slot"] == "2"
+            # Features should include post_dial (note: code uses "post_dial" prefix)
+            assert "post_dial:123" in rows[1]["Features"]

@@ -3,7 +3,7 @@ Call Log Generator for SMS Backup & Restore archives.
 
 This module extracts call history from SMS Backup & Restore XML backup files
 and generates a deduplicated CSV call log. The CSV includes call type,
-duration, caller information, and timestamps.
+duration, caller information, timestamps, and additional metadata.
 
 Call types supported:
 - Incoming, Outgoing, Missed, Voicemail, Rejected, Blocked, Answered Externally
@@ -14,7 +14,8 @@ Credits:
 """
 import csv
 import os
-import xml.etree.ElementTree as ET
+
+import lxml.etree
 
 
 def get_human_readable_duration(duration_raw_s: str) -> str:
@@ -69,9 +70,10 @@ def create_call_log(calls_xml_dir: str, output_dir: str = None) -> None:
     """
     Generate a deduplicated call log CSV from SMS Backup & Restore XML files.
     
+    Uses lxml.etree.iterparse() for memory-efficient processing of large files.
     Processes all XML files starting with "calls" in the input directory,
-    extracts call information, and writes a CSV file with deduplicated entries.
-    Calls are deduplicated by timestamp (only one call per timestamp).
+    extracts call information including additional metadata fields, and writes
+    a CSV file with deduplicated entries. Calls are deduplicated by timestamp.
     
     Args:
         calls_xml_dir: Directory containing call backup XML files
@@ -86,6 +88,9 @@ def create_call_log(calls_xml_dir: str, output_dir: str = None) -> None:
         - Caller #: Phone number
         - Call duration (s): Duration in seconds (or "N/A" for missed calls)
         - Call duration: Human-readable duration (or "N/A" for missed calls)
+        - Read status: "1" if read, "0" if unread (when available)
+        - SIM slot: Subscription ID (1, 2, etc. for dual SIM devices)
+        - Features: Additional call features (video call, HD, etc. when available)
         - Call Id #: Sequential call identifier
     """
     all_calls_list = []
@@ -114,31 +119,46 @@ def create_call_log(calls_xml_dir: str, output_dir: str = None) -> None:
             continue
 
         file_path = os.path.join(calls_xml_dir, filename)
-        xml_tree = ET.parse(file_path)
 
-        for call_entry_xml in xml_tree.findall(".//call"):
-            call_timestamp = call_entry_xml.attrib["date"]
+        # Use iterparse for memory-efficient XML parsing
+        context = lxml.etree.iterparse(
+            file_path,
+            events=('end',),
+            huge_tree=True,
+            recover=True
+        )
+
+        for event, elem in context:
+            if elem.tag != 'call':
+                elem.clear()
+                continue
+
+            call_timestamp = elem.get("date", "")
             
             # Skip if this call timestamp was already processed (deduplication)
-            if call_timestamp in call_timestamps:
+            if not call_timestamp or call_timestamp in call_timestamps:
+                elem.clear()
+                parent = elem.getparent()
+                if parent is not None:
+                    parent.remove(elem)
                 continue
 
             call_entry_obj = {}
             call_entry_obj[call_timestamp_key_name] = call_timestamp
-            call_entry_obj["Call date"] = call_entry_xml.attrib["readable_date"]
-
+            call_entry_obj["Call date"] = elem.get("readable_date", "")
+            
             # Map call type code to readable name
-            call_type_code = call_entry_xml.attrib["type"]
+            call_type_code = elem.get("type", "")
             call_type = call_type_map.get(call_type_code, "Unknown")
             call_entry_obj["Call type"] = call_type
 
-            call_entry_obj["Caller name"] = call_entry_xml.attrib["contact_name"]
-            call_entry_obj["Caller #"] = call_entry_xml.attrib["number"]
+            call_entry_obj["Caller name"] = elem.get("contact_name", "(Unknown)")
+            call_entry_obj["Caller #"] = elem.get("number", "")
 
             # Handle call duration
-            # Missed calls don"t have duration, but incoming/outgoing calls
+            # Missed calls don't have duration, but incoming/outgoing calls
             # may have duration of 0 if you hang up immediately
-            call_duration_raw = call_entry_xml.attrib["duration"]
+            call_duration_raw = elem.get("duration", "0")
 
             if call_type != "Missed":
                 # Store both raw seconds and human-readable format
@@ -152,12 +172,44 @@ def create_call_log(calls_xml_dir: str, output_dir: str = None) -> None:
                 call_entry_obj["Call duration (s)"] = "N/A"
                 call_entry_obj["Call duration"] = "N/A"
 
+            # Extract additional metadata fields
+            # Read status: "1" = read, "0" = unread (if available)
+            read_status = elem.get("read", "")
+            call_entry_obj["Read status"] = read_status if read_status else "N/A"
+            
+            # SIM slot: subscription_id indicates which SIM card (for dual SIM)
+            subscription_id = elem.get("subscription_id", "")
+            call_entry_obj["SIM slot"] = subscription_id if subscription_id else "N/A"
+            
+            # Features: Additional call features (presentation, post_dial_digits, etc.)
+            features = []
+            presentation = elem.get("presentation", "")
+            if presentation and presentation != "1":  # 1 is default/normal
+                features.append(f"presentation:{presentation}")
+            
+            post_dial = elem.get("post_dial_digits", "")
+            if post_dial:
+                features.append(f"post_dial:{post_dial}")
+            
+            # Check for video call or other features (may be in other attributes)
+            # The XML may contain additional feature indicators in future versions
+            call_entry_obj["Features"] = ", ".join(features) if features else "N/A"
+
             call_entry_obj["Call Id #"] = num_calls
 
             # Mark this timestamp as processed
             call_timestamps.add(call_timestamp)
             all_calls_list.append(call_entry_obj)
             num_calls += 1
+
+            # Free memory by clearing processed element
+            elem.clear()
+            parent = elem.getparent()
+            if parent is not None:
+                parent.remove(elem)
+
+        # Done parsing this file
+        del context
 
         print(
             f"[DEBUG] Finished processing file {filename} .. now at {num_calls} calls total"

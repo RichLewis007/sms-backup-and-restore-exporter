@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](CHANGELOG.md)
 
 ---
 
@@ -30,15 +30,16 @@
 
 ## 🎯 Overview
 
-The [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore&hl=en_US) app (official name: `com.riteshsahu.SMSBackupRestore`) allows you to backup your entire SMS history, call logs, and contacts from Android devices. While the app provides an [online viewer](https://www.synctech.com.au/sms-backup-restore/view-backup/) for viewing backups, **exporting the actual data** from these backups can be challenging.
+The [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore&hl=en_US) app allows you to backup your entire SMS history, call logs, and contacts from Android devices. While the app provides an [online viewer](https://www.synctech.com.au/sms-backup-restore/view-backup/) for viewing backups, **exporting the actual data** from these backups can be challenging.
 
 **This tool solves that problem** by providing a powerful, command-line utility to export data from SMS Backup & Restore archives. It can extract:
 
-> **Note:** This application is based upon the original code from [@raleighlittles](https://github.com/raleighlittles) ([original repository](https://github.com/raleighlittles/SMS-backup-and-restore-extractor)) and has been greatly expanded and improved upon. The original concept and v1 implementation were created by Raleigh Littles, and this version 2.0 represents a complete modernization with enhanced functionality, better error handling, comprehensive testing, and modern Python tooling.
+> **Note:** This application is based upon the original v1 concept and code from [@raleighlittles](https://github.com/raleighlittles) ([original repository](https://github.com/raleighlittles/SMS-backup-and-restore-extractor)) and has been greatly expanded and improved upon, with time and attention spend on code quality and tests. This version 2.0 represents a complete modernization with enhanced functionality and new features, better error handling, comprehensive testing, and modern Python tooling.
 
 **Features include:**
 - 📸 **Media files** from MMS messages (images, videos, audio, PDFs)
-- 📞 **Call logs** as structured CSV files
+- 💬 **SMS/MMS text messages** exported to CSV files
+- 📞 **Call logs** as structured CSV files with enhanced metadata
 - 👤 **Contact media** from VCF/vCard files (photos, sounds, logos, keys)
 
 ---
@@ -49,9 +50,11 @@ The [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.rit
 - 📁 **Flexible Input** - Accepts directories or individual files
 - 🛣️ **Smart Path Handling** - Supports relative paths, `~` expansion, and absolute paths
 - 🎨 **Selective Extraction** - Choose which media types to extract (images, videos, audio, PDFs)
-- 📊 **CSV Export** - Call logs exported as clean, structured CSV files
-- 🔍 **vCard Support** - Handles vCard versions 2.1, 3.0, and 4.0
-- ⚡ **Fast & Efficient** - Built with modern Python tooling (`uv`, `lxml`)
+- 📊 **CSV Export** - Call logs and SMS messages exported as clean, structured CSV files
+- 🔍 **vCard Support** - Handles vCard versions 2.1, 3.0, and 4.0 with comprehensive field parsing
+- ⚡ **Fast & Efficient** - Built with modern Python tooling (`uv`, `lxml`) using memory-efficient streaming parsers
+- 📝 **Text Message Export** - Extract all SMS text messages and MMS text bodies to CSV
+- 📱 **Enhanced Metadata** - Call logs include read status, SIM slot, and call features
 - 🧪 **Well Tested** - Comprehensive test suite included
 
 ---
@@ -115,7 +118,7 @@ pip install -e .
 
 ## 🚀 Quick Start
 
-1. **Get your backup files** from SMS Backup & Restore:
+1. **Get your backup files** from the Android app "SMS Backup & Restore":
    - SMS backups: `sms-*.xml` files
    - Call logs: `calls-*.xml` files
    - Contacts: `*.vcf` files
@@ -125,12 +128,17 @@ pip install -e .
    uv run xml-backup-exporter -t sms -i ~/backups -o ~/extracted_media
    ```
 
-3. **Generate call log**:
+3. **Extract SMS/MMS text messages**:
+   ```bash
+   uv run xml-backup-exporter -t sms-text -i ~/backups -o ~/messages
+   ```
+
+4. **Generate call log**:
    ```bash
    uv run xml-backup-exporter -t calls -i ~/backups -o ~/call_logs
    ```
 
-4. **Extract contact media**:
+5. **Extract contact media**:
    ```bash
    uv run xml-backup-exporter -t vcf -i ~/backups -o ~/contact_media
    ```
@@ -150,7 +158,7 @@ uv run xml-backup-exporter [-h] -t BACKUP_TYPE -i INPUT_DIR -o OUTPUT_DIR [OPTIO
 | Option | Description |
 |--------|-------------|
 | `-h, --help` | Show help message and exit |
-| `-t, --backup-type` | Type of extraction: `sms`, `calls`, or `vcf` |
+| `-t, --backup-type` | Type of extraction: `sms`, `sms-text`, `calls`, or `vcf` |
 | `-i, --input-dir` | Directory containing XML or VCF files (can also be a single file) |
 | `-o, --output-dir` | Directory where extracted files will be saved |
 | `--no-images` | Don't extract image files (SMS only) |
@@ -189,6 +197,9 @@ The output directory will be **automatically created** if it doesn't exist. You 
 
 ## 📝 Examples
 
+<details>
+<summary><b>Click to expand examples</b></summary>
+
 ### Extract All MMS Media
 
 Extract all images, videos, audio, and PDFs from SMS backups:
@@ -222,6 +233,16 @@ uv run xml-backup-exporter -t calls -i ~/backups -o ~/call_logs
 ```
 
 The output will be a file named `call_log.csv` in the output directory.
+
+### Extract SMS/MMS Text Messages
+
+Extract all SMS text messages and MMS text bodies to a CSV file:
+
+```bash
+uv run xml-backup-exporter -t sms-text -i ~/backups -o ~/messages
+```
+
+The output will be a file named `sms_messages.csv` in the output directory.
 
 ### Extract Contact Media from VCF
 
@@ -259,9 +280,14 @@ python -m src.xml_backup_exporter -t sms -i ~/backups -o ~/output
 uv run python -m src.xml_backup_exporter -t sms -i ~/backups -o ~/output
 ```
 
+</details>
+
 ---
 
 ## 📊 Output Format
+
+<details>
+<summary><b>Click to expand output format details</b></summary>
 
 ### SMS/MMS Media Files
 
@@ -270,6 +296,34 @@ uv run python -m src.xml_backup_exporter -t sms -i ~/backups -o ~/output
 - **Duplicate handling**: Duplicate files are automatically removed
 - **Empty file removal**: Empty files are automatically removed
 - **File safety**: Long filenames are automatically shortened to prevent filesystem issues
+
+### SMS/MMS Text Messages CSV Format
+
+The `sms_messages.csv` file contains the following columns:
+
+| Column | Description | Example |
+|--------|-------------|---------|
+| `Message Type` | Message type | `SMS` or `MMS` |
+| `Date (timestamp)` | Unix timestamp in milliseconds | `1511043340171` |
+| `Date` | Human-readable date | `"Nov 18, 2017 5:15:40 PM"` |
+| `Address` | Phone number or address | `+15137392992` |
+| `Contact Name` | Contact name | `John Doe` |
+| `Type` | Message direction | `1` (incoming) or `2` (outgoing) |
+| `Body` | Message text content | `"Hello, how are you?"` |
+| `Read` | Read status | `1` (read) or `0` (unread) |
+| `Status` | Message status | `0` (normal) |
+| `Locked` | Locked status | `0` (unlocked) or `1` (locked) |
+| `SIM ID` | SIM slot identifier | `1`, `2`, etc. |
+| `Message ID` | Unique message identifier | `0` |
+
+**Example CSV output:**
+
+```csv
+Message Type,Date (timestamp),Date,Address,Contact Name,Type,Body,Read,Status,Locked,SIM ID,Message ID
+SMS,1511043340171,"Nov 18, 2017 5:15:40 PM",+15137392992,Julie Herrmann,1,"Hi",1,0,0,-1,0
+SMS,1511044592590,"Nov 18, 2017 5:36:32 PM",+15137392992,Julie Herrmann,2,"I'm testing my new pixel 2 phone",1,0,0,-1,1
+MMS,1737247128163,"Jan 18, 2025 7:38:48 PM",+15132650018,Heather Lewis,132,"Thank you!",1,null,0,1,2
+```
 
 ### Call Log CSV Format
 
@@ -284,15 +338,18 @@ The `call_log.csv` file contains the following columns:
 | `Caller #` | Phone number | `+1234567890` |
 | `Call duration (s)` | Duration in seconds | `65` |
 | `Call duration` | Human-readable duration | `"1 minute, 5 seconds"` |
+| `Read status` | Read status (when available) | `1` (read) or `N/A` |
+| `SIM slot` | SIM slot identifier (dual SIM) | `1`, `2`, or `N/A` |
+| `Features` | Additional call features | `presentation:1` or `N/A` |
 | `Call Id #` | Unique call identifier | `0` |
 
 **Example CSV output:**
 
 ```csv
-Call Date (timestamp),Call date,Call type,Caller name,Caller #,Call duration (s),Call duration,Call Id #
-1451965221740,"Jan 4, 2016 7:40:21 PM",Incoming,Dad,+18183457890,65,"1 minute, 5 seconds",0
-1452020364934,"Jan 5, 2016 10:59:24 AM",Missed,(Unknown),+11234560987,N/A,N/A,1
-1452107940226,"Jan 6, 2016 11:19:00 AM",Incoming,Michael Jordan,+11234567890,194,"3 minutes, 14 seconds",2
+Call Date (timestamp),Call date,Call type,Caller name,Caller #,Call duration (s),Call duration,Read status,SIM slot,Features,Call Id #
+1451965221740,"Jan 4, 2016 7:40:21 PM",Incoming,Dad,+18183457890,65,"1 minute, 5 seconds",1,1,N/A,0
+1452020364934,"Jan 5, 2016 10:59:24 AM",Missed,(Unknown),+11234560987,N/A,N/A,1,1,N/A,1
+1452107940226,"Jan 6, 2016 11:19:00 AM",Incoming,Michael Jordan,+11234567890,194,"3 minutes, 14 seconds",1,1,N/A,2
 ```
 
 ### vCard/VCF Media Files
@@ -301,10 +358,21 @@ Call Date (timestamp),Call date,Call type,Caller name,Caller #,Call duration (s)
 - **Fallback naming**: If no contact name is available, a random 10-character filename is used
 - **Supported media**: Photos, sounds, logos, and cryptographic keys
 - **Format support**: Base64-encoded data and URL-based media downloads
+- **Field parsing**: Comprehensive field support including:
+  - Basic fields: Names, addresses, phone numbers, emails, URLs, notes
+  - Dates: Birthday (BDAY), anniversary (ANNIVERSARY)
+  - Contact info: Organization, title, role, gender
+  - Multimedia: Photos, sounds, logos, keys
+  - Advanced: Geographic coordinates, instant messenger handles, categories
+
+</details>
 
 ---
 
 ## 🔧 Troubleshooting
+
+<details>
+<summary><b>Click to expand troubleshooting guide</b></summary>
 
 ### Common Issues
 
@@ -375,9 +443,14 @@ If you encounter issues:
 3. **Include backup date** - If reporting an issue, include when your backup was generated
 4. **Check file permissions** - Ensure you have read access to input files and write access to output directory
 
+</details>
+
 ---
 
 ## 🧪 Development
+
+<details>
+<summary><b>Click to expand development information</b></summary>
 
 ### Running Tests
 
@@ -416,9 +489,14 @@ sms-backup-and-restore-exporter/
 
 We welcome contributions! Please see our [Contributing Guidelines](#-contributing) below.
 
+</details>
+
 ---
 
 ## 🤝 Contributing
+
+<details>
+<summary><b>Click to expand contributing guidelines</b></summary>
 
 Contributions are welcome and appreciated! Here's how you can help:
 
@@ -448,6 +526,8 @@ When reporting bugs or requesting features, please include:
 - Add tests for new features
 - Update documentation as needed
 - Ensure all tests pass before submitting
+
+</details>
 
 ---
 
@@ -481,40 +561,48 @@ If you appreciate the original work that this project is based on, please consid
 - Buy Me a Coffee: [https://www.buymeacoffee.com/raleighlittles](https://www.buymeacoffee.com/raleighlittles)
 
 **Additional Thanks:**
-- Built with [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore) backup format
+- Built with [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore&hl=en_US) backup format
 - Powered by modern Python tooling: [uv](https://github.com/astral-sh/uv), [lxml](https://lxml.de/), [pytest](https://pytest.org/)
 
 ---
 
-## 📚 Additional Resources
+<details>
+<summary><b>📚 Additional Resources</b></summary>
 
-- [SMS Backup & Restore App](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore) - Official Android app
+- [SMS Backup & Restore App](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore&hl=en_US) - Official Android app
 - [Online Backup Viewer](https://www.synctech.com.au/sms-backup-restore/view-backup/) - View backups online
 - [vCard Specification](https://en.wikipedia.org/wiki/VCard) - Learn more about vCard format
 - [CHANGELOG.md](CHANGELOG.md) - View version history and changes
 
+</details>
+
 ---
 
-## ⚠️ Limitations
+<details>
+<summary><b>⚠️ Limitations</b></summary>
 
 - **No date information** for images in MMS backups - the backup format doesn't preserve image creation dates
 - **EXIF data loss** - EXIF metadata is lost when images are stored in backups
 - **Schema changes** - The backup app's schema may have changed since 2016; please report compatibility issues with your backup date
 
+</details>
+
 ---
 
-## 🗺️ Roadmap
+<details>
+<summary><b>🗺️ Roadmap</b></summary>
 
 Future enhancements planned:
 
-- [ ] Refactor vCard/VCF parser for better maintainability
-- [ ] Add ability to convert SMS messages to CSV format
+- [x] Add ability to convert SMS messages to CSV format
 - [ ] Improve error messages and user feedback
 - [ ] Add support for additional media formats
 - [ ] Create GUI version of the tool
 
+</details>
+
 ---
 
-**Version 2.0.0** - Modernized and enhanced for 2026 🚀
+**Version 2.1.0** - Enhanced with SMS/MMS text extraction and comprehensive tests 🚀
 
 For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/RichLewis007/sms-backup-and-restore-exporter).

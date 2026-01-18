@@ -6,9 +6,10 @@ This application is based upon the original code from @raleighlittles
 greatly expanded and improved upon.
 
 This module provides the command-line interface for exporting data from
-SMS Backup & Restore backup archives. It supports three types of export:
+SMS Backup & Restore backup archives. It supports four types of export:
 - SMS/MMS media files (images, videos, audio, PDFs)
-- Call logs (as CSV files)
+- SMS/MMS text messages (exported to CSV)
+- Call logs (as CSV files with enhanced metadata)
 - vCard/VCF contact media (photos, sounds, logos, keys)
 
 Credits:
@@ -22,6 +23,7 @@ from argparse import RawTextHelpFormatter
 from . import call_log_generator
 from . import contacts_vcard_extractor
 from . import mms_media_extractor
+from . import sms_text_extractor
 
 
 def normalize_path(path: str) -> str:
@@ -64,6 +66,7 @@ def main() -> None:
     
     Supported backup types:
     - 'sms': Export MMS media attachments from SMS backup XML files
+    - 'sms-text': Export SMS text messages and MMS text bodies to CSV
     - 'calls': Generate a deduplicated call log CSV from call backup XML files
     - 'vcf': Export multimedia content from vCard/VCF contact files
     
@@ -85,6 +88,9 @@ def main() -> None:
 
   To export VCF/vCard media:
      xml-backup-exporter -t vcf -i input_dir -o output_dir
+
+  To export SMS text messages and MMS text bodies:
+     xml-backup-exporter -t sms-text -i input_dir -o output_dir
  
 '''
     )
@@ -99,8 +105,8 @@ def main() -> None:
         "-t", "--backup-type",
         type=str,
         required=True,
-        choices=["sms", "calls", "vcf"],
-        help="The type of export: 'sms' for message media files, 'calls' to create a call log, or 'vcf' to export media from a VCF/vCard file"
+        choices=["sms", "sms-text", "calls", "vcf"],
+        help="The type of export: 'sms' for message media files, 'sms-text' for SMS/MMS text messages, 'calls' to create a call log, or 'vcf' to export media from a VCF/vCard file"
     )
     parser.add_argument(
         "-o", "--output-dir",
@@ -162,6 +168,8 @@ def main() -> None:
             args.process_audio,
             args.process_pdfs
         )
+    elif args.backup_type == "sms-text":
+        sms_text_extractor.extract_sms_messages(input_dir, output_dir)
     elif args.backup_type == "calls":
         call_log_generator.create_call_log(input_dir, output_dir)
     elif args.backup_type == "vcf":

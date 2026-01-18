@@ -86,6 +86,22 @@ class TestNormalizePath:
         mock_calls.create_call_log.assert_called_once()
 
     @patch('src.xml_backup_exporter.mms_media_extractor')
+    @patch('src.xml_backup_exporter.sms_text_extractor')
+    @patch('src.xml_backup_exporter.call_log_generator')
+    @patch('src.xml_backup_exporter.contacts_vcard_extractor')
+    @patch('sys.argv', ['xml-backup-exporter', '-t', 'sms-text', '-i', '/test/input', '-o', '/test/output'])
+    def test_main_sms_text_extraction(self, mock_vcf, mock_calls, mock_sms_text, mock_sms):
+        """Test main function with sms-text backup type."""
+        from src.xml_backup_exporter import main
+        
+        with patch('src.xml_backup_exporter.normalize_path', side_effect=lambda x: x):
+            with patch('os.path.isfile', return_value=False):
+                with patch('os.path.isdir', return_value=True):
+                    main()
+        
+        mock_sms_text.extract_sms_messages.assert_called_once()
+
+    @patch('src.xml_backup_exporter.mms_media_extractor')
     @patch('src.xml_backup_exporter.call_log_generator')
     @patch('src.xml_backup_exporter.contacts_vcard_extractor')
     @patch('sys.argv', ['xml-backup-exporter', '-t', 'vcf', '-i', '/test/input', '-o', '/test/output'])
