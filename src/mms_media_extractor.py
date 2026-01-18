@@ -68,6 +68,15 @@ def reconstruct_mms_media(sms_xml_dir: str, output_media_dir: str, process_image
     if not is_valid_output_directory(output_media_dir):
         return
 
+    if not os.path.exists(sms_xml_dir):
+        print(f"Error: Input directory does not exist: {sms_xml_dir}")
+        print("Please provide a valid directory path containing SMS backup XML files.")
+        return
+
+    if not os.path.isdir(sms_xml_dir):
+        print(f"Error: Input path is not a directory: {sms_xml_dir}")
+        return
+
     start_time = time.time()
     orig_files_count = 0
 

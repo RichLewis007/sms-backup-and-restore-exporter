@@ -111,6 +111,15 @@ def generate_multimedia_of_contact(contact: dict, output_dir: str):
 
 def parse_contacts_from_vcf_files(vcf_files_dir: str, output_media_dir: str) -> None:
 
+    if not os.path.exists(vcf_files_dir):
+        print(f"Error: Input directory does not exist: {vcf_files_dir}")
+        print("Please provide a valid directory path containing VCF/vCard files.")
+        return
+
+    if not os.path.isdir(vcf_files_dir):
+        print(f"Error: Input path is not a directory: {vcf_files_dir}")
+        return
+
     all_contacts = []
 
     for filename in os.listdir(vcf_files_dir):

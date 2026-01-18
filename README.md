@@ -1,5 +1,9 @@
 ![app-store-listing-image](https://images-na.ssl-images-amazon.com/images/I/71VnjnwSr4L.png)
 
+# SMS Backup & Restore Extractor
+
+**Version 2.0.0**
+
 # About
 
 The *SMS Backup & Restore* app on [Google Play](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore&hl=en_US) (official name: `com.riteshsahu.SMSBackupRestore`) allows you to backup:
@@ -55,17 +59,21 @@ will be either downloaded (if they're stored) as a URL, or otherwise decoded (fr
 
 ## Installation
 
-Install dependencies using uv:
+Install dependencies and the package using uv:
 
 ```bash
 uv sync
 ```
 
+This will install all dependencies and make the `backup-extractor` command available via `uv run`.
+
 Or if you prefer pip (requirements.txt is still provided for compatibility):
 
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
+
+This installs the package in editable mode so you can use `backup-extractor` directly.
 
 ## Steps
 
@@ -74,11 +82,13 @@ pip install -r requirements.txt
 
 ## Usage
 
-After installing with `uv sync`, you can use the `backup-extractor` command:
+After installing with `uv sync`, run the command using `uv run`:
 
 ```bash
-backup-extractor [-h] [-i INPUT_DIR] [-t BACKUP_TYPE] [-o OUTPUT_DIR] [--no-images] [--no-videos] [--no-audio] [--no-pdfs]
+uv run backup-extractor [-h] [-i INPUT_DIR] [-t BACKUP_TYPE] [-o OUTPUT_DIR] [--no-images] [--no-videos] [--no-audio] [--no-pdfs]
 ```
+
+Or if you installed with `pip install -e .`, you can use `backup-extractor` directly.
 
 **Options:**
   - `-h, --help`            show this help message and exit
@@ -95,30 +105,39 @@ backup-extractor [-h] [-i INPUT_DIR] [-t BACKUP_TYPE] [-o OUTPUT_DIR] [--no-imag
 
 **Examples:**
 
+  > **Note:** Replace `path/to/input` and `path/to/output` with your actual directory paths.
+
   To extract all MMS media attachments:
   ```bash
-  backup-extractor -t sms -i input_dir -o output_dir
+  uv run backup-extractor -t sms -i path/to/input -o path/to/output
   ```
 
   To extract only Video files:
   ```bash
-  backup-extractor -t sms -i input_dir -o output_dir --no-images --no-audio --no-pdfs
+  uv run backup-extractor -t sms -i path/to/input -o path/to/output --no-images --no-audio --no-pdfs
   ```
 
   To extract a de-duplicated call log:
   ```bash
-  backup-extractor -t calls -i input_dir -o output_dir
+  uv run backup-extractor -t calls -i path/to/input -o path/to/output
   ```
 
   To extract VCF/vCard media:
   ```bash
-  backup-extractor -t vcf -i input_dir -o output_dir
+  uv run backup-extractor -t vcf -i path/to/input -o path/to/output
   ```
 
-**Alternative:** You can also run the module directly with Python:
-```bash
-python -m src.backup_extractor -t sms -i input_dir -o output_dir
-```
+**Alternative methods:**
+
+1. If you installed with `pip install -e .`, you can use `backup-extractor` directly (without `uv run`)
+2. Run the module directly with Python:
+   ```bash
+   python -m src.backup_extractor -t sms -i path/to/input -o path/to/output
+   ```
+3. Or use `uv run python -m src.backup_extractor`:
+   ```bash
+   uv run python -m src.backup_extractor -t sms -i path/to/input -o path/to/output
+   ```
 
 
 ## Output info
