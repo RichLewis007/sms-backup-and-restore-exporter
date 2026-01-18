@@ -8,6 +8,7 @@ including addresses, names, emails, multimedia tags, and more.
 vCard format uses semicolons (;) as field separators and colons (:) as
 key-value separators. Some fields may span multiple lines.
 """
+
 import typing
 
 from . import vcard_multimedia_helper
@@ -20,26 +21,47 @@ TYPE_ASSIGNMENT_OR_LABEL_SEPARATOR = "="  # Used in TYPE=value constructs
 # Simple keys that don't require special parsing - just key:value pairs
 # Examples: ANNIVERSARY:19901021, FN:Dr. John Doe, GENDER:F
 SIMPLE_KEYS = [
-    "AGENT", "ANNIVERSARY", "BDAY", "CALADRURI", "CALURI", "CLASS", "FBURL",
-    "FN", "GENDER", "KIND", "LANG", "MAILER", "NICKNAME", "NOTE", "PRODID",
-    "PROFILE", "REV", "ROLE", "SORT-STRING", "SOURCE", "TITLE", "TZ", "URL",
-    "VERSION", "XML"
+    "AGENT",
+    "ANNIVERSARY",
+    "BDAY",
+    "CALADRURI",
+    "CALURI",
+    "CLASS",
+    "FBURL",
+    "FN",
+    "GENDER",
+    "KIND",
+    "LANG",
+    "MAILER",
+    "NICKNAME",
+    "NOTE",
+    "PRODID",
+    "PROFILE",
+    "REV",
+    "ROLE",
+    "SORT-STRING",
+    "SOURCE",
+    "TITLE",
+    "TZ",
+    "URL",
+    "VERSION",
+    "XML",
 ]
 
 
 def parse_simple_tag(file_line: str) -> str:
     """
     Parse a simple vCard tag (key:value format).
-    
+
     Handles cases where the value contains colons (e.g., URLs).
     Splits on the first colon and joins everything after it.
-    
+
     Args:
         file_line: vCard line in format "KEY:value" or "KEY:value:with:colons"
-        
+
     Returns:
         The value portion (everything after the first colon)
-        
+
     Example:
         >>> parse_simple_tag("FN:John Doe")
         'John Doe'
@@ -54,13 +76,13 @@ def parse_simple_tag(file_line: str) -> str:
 def parse_address_tag(address_line: str) -> dict:
     """
     Parse an ADR (address) tag from a vCard.
-    
+
     Address format: ADR;TYPE=HOME:;;123 Main St;City;State;12345;USA
     Some fields may be empty.
-    
+
     Args:
         address_line: vCard address line
-        
+
     Returns:
         Dictionary with address type as key and address string as value
         Example: {"HOME": "123 Main St City State 12345 USA"}
@@ -97,15 +119,15 @@ def parse_address_tag(address_line: str) -> dict:
 def parse_categories_tag(category_line: str) -> tuple:
     """
     Parse a CATEGORIES tag from a vCard.
-    
+
     Categories are comma-separated and returned sorted alphabetically.
-    
+
     Args:
         category_line: vCard categories line (e.g., "CATEGORIES:swimmer,biker")
-        
+
     Returns:
         Sorted tuple of category strings
-        
+
     Example:
         >>> parse_categories_tag("CATEGORIES:swimmer,biker")
         ('biker', 'swimmer')
@@ -118,12 +140,12 @@ def parse_categories_tag(category_line: str) -> tuple:
 def parse_clientpidmap_tag(clientpidmap_line: str) -> dict:
     """
     Parse a CLIENTPIDMAP tag from a vCard.
-    
+
     Format: CLIENTPIDMAP;urn:value
-    
+
     Args:
         clientpidmap_line: vCard CLIENTPIDMAP line
-        
+
     Returns:
         Dictionary mapping PID source identifier to URN
     """
@@ -136,12 +158,12 @@ def parse_clientpidmap_tag(clientpidmap_line: str) -> dict:
 def parse_email_tag(email_line: str) -> dict:
     """
     Parse an EMAIL tag from a vCard.
-    
+
     Format: EMAIL;TYPE=INTERNET:email@example.com
-    
+
     Args:
         email_line: vCard email line
-        
+
     Returns:
         Dictionary with email type as key and email address as value
     """
@@ -151,13 +173,13 @@ def parse_email_tag(email_line: str) -> dict:
 def parse_geo_tag(geo_line: str) -> dict:
     """
     Parse a GEO (geographic coordinates) tag from a vCard.
-    
+
     Supports vCard 2.1/3.0 format: GEO:lat;lon
     and vCard 4.0 format: GEO;TYPE=work:geo:lat,lon
-    
+
     Args:
         geo_line: vCard GEO line
-        
+
     Returns:
         Dictionary with "latitude" and "longitude" keys
     """
@@ -177,12 +199,12 @@ def parse_geo_tag(geo_line: str) -> dict:
 def parse_instant_messenger_handle_tag(impp_line: str) -> dict:
     """
     Parse an IMPP (instant messaging) tag from a vCard.
-    
+
     Format: IMPP;TYPE=xmpp:handle@example.com
-    
+
     Args:
         impp_line: vCard IMPP line
-        
+
     Returns:
         Dictionary with "type" and "handle" keys
     """
@@ -193,12 +215,12 @@ def parse_instant_messenger_handle_tag(impp_line: str) -> dict:
 def parse_mailing_label_tag(label_line: str) -> dict:
     """
     Parse a LABEL tag from a vCard.
-    
+
     Format: LABEL;TYPE=HOME:123 Main St...
-    
+
     Args:
         label_line: vCard LABEL line
-        
+
     Returns:
         Dictionary with label type as key and label text as value
     """
@@ -208,12 +230,12 @@ def parse_mailing_label_tag(label_line: str) -> dict:
 def parse_member_tag(member_line: str) -> dict:
     """
     Parse a MEMBER tag from a vCard.
-    
+
     Format: MEMBER;VALUE=uri:urn:uuid:...
-    
+
     Args:
         member_line: vCard MEMBER line
-        
+
     Returns:
         Dictionary mapping member ID type to member ID value
     """
@@ -226,12 +248,12 @@ def parse_member_tag(member_line: str) -> dict:
 def parse_name_tag(name_line: str) -> dict:
     """
     Parse an N (name) tag from a vCard.
-    
+
     Format: N:Doe;John;F;; (family;given;additional;prefix;suffix)
-    
+
     Args:
         name_line: vCard N line
-        
+
     Returns:
         Dictionary with name components:
         - family_name
@@ -246,7 +268,7 @@ def parse_name_tag(name_line: str) -> dict:
         "given_name",
         "additional_middle_names",
         "honorific_prefixes",
-        "honorific_suffixes"
+        "honorific_suffixes",
     ]
     return helper_match_subkey_types_and_values(subname_key_types, name_line_split)
 
@@ -254,15 +276,15 @@ def parse_name_tag(name_line: str) -> dict:
 def return_name_tag_formatted(name_tag_field: dict) -> str:
     """
     Format a name tag dictionary into a single string.
-    
+
     Concatenates all name components in order.
-    
+
     Args:
         name_tag_field: Dictionary with name components (from parse_name_tag)
-        
+
     Returns:
         Concatenated name string
-        
+
     Example:
         >>> return_name_tag_formatted({
         ...     'family_name': 'Kennedy',
@@ -280,18 +302,18 @@ def return_name_tag_formatted(name_tag_field: dict) -> str:
 def parse_organization_tag(organization_line: str) -> typing.Union[str, dict]:
     """
     Parse an ORG (organization) tag from a vCard.
-    
+
     Can be simple (single value) or have subfields.
-    
+
     Args:
         organization_line: vCard ORG line
-        
+
     Returns:
         String for simple format, or dictionary with subfields:
         - organization_name
         - collective_organization_name
         - organizational_unit_name
-        
+
     Reference:
         https://www.itu.int/ITU-T/formal-language/itu-t/x/x520/2012/SelectedAttributeTypes.html
     """
@@ -305,7 +327,7 @@ def parse_organization_tag(organization_line: str) -> typing.Union[str, dict]:
         sub_org_key_types = [
             "organization_name",
             "collective_organization_name",
-            "organizational_unit_name"
+            "organizational_unit_name",
         ]
         return helper_match_subkey_types_and_values(
             sub_org_key_types, organization_line_split
@@ -315,12 +337,12 @@ def parse_organization_tag(organization_line: str) -> typing.Union[str, dict]:
 def parse_related_tag(related_line: str) -> dict:
     """
     Parse a RELATED tag from a vCard.
-    
+
     Format: RELATED;TYPE=contact:urn:uuid:...
-    
+
     Args:
         related_line: vCard RELATED line
-        
+
     Returns:
         Dictionary with relation type as key and relation value
     """
@@ -330,12 +352,12 @@ def parse_related_tag(related_line: str) -> dict:
 def parse_telephone_tag(telephone_textline: str) -> dict:
     """
     Parse a TEL (telephone) tag from a vCard.
-    
+
     Format: TEL;TYPE=CELL:+1234567890
-    
+
     Args:
         telephone_textline: vCard TEL line
-        
+
     Returns:
         Dictionary with phone type as key and phone number as value
     """
@@ -345,12 +367,12 @@ def parse_telephone_tag(telephone_textline: str) -> dict:
 def parse_uuid_tag(uuid_textline: str) -> dict:
     """
     Parse a UID tag from a vCard.
-    
+
     Format: UID:urn:uuid:...
-    
+
     Args:
         uuid_textline: vCard UID line
-        
+
     Returns:
         Dictionary with UID type as key and UID data as value
     """
@@ -363,9 +385,9 @@ def parse_uuid_tag(uuid_textline: str) -> dict:
 def parse_multimedia_tag(multimedia_tag_line: str) -> dict:
     """
     Parse a multimedia tag (PHOTO, SOUND, LOGO, KEY) from a vCard.
-    
+
     Multimedia tags can appear in 6 different formats:
-    
+
     1. <TAG-NAME>;<TAG-TYPE>:<TAG-DATA-URL>
     2. <TAG-NAME>;<TAG-TYPE>;ENCODING=BASE64:[base64-data]
     2a. <TAG-NAME>;ENCODING=BASE64;<TAG-TYPE>:[base64-data] (non-standard)
@@ -373,19 +395,19 @@ def parse_multimedia_tag(multimedia_tag_line: str) -> dict:
     4. <TAG-NAME>;TYPE=<TAG-TYPE>;ENCODING=b:[base64-data]
     5. <TAG-NAME>;MEDIATYPE=<TAG-MIME-TYPE>:<TAG-DATA-URL>
     6. <TAG-NAME>:data:<TAG-MIME-TYPE>;base64,[base64-data]
-    
+
     Note: Case 2a isn't documented in the vCard spec but is used in practice.
-    
+
     Args:
         multimedia_tag_line: vCard multimedia line (tag name prefix removed)
-        
+
     Returns:
         Dictionary with keys:
         - tag_type: Media type (e.g., "jpeg")
         - tag_data: Base64-encoded data (if present)
         - tag_url: URL to media (if present)
         - tag_mime_type: MIME type (if present)
-        
+
     Raises:
         Exception: If the multimedia tag format cannot be parsed
     """
@@ -402,24 +424,14 @@ def parse_multimedia_tag(multimedia_tag_line: str) -> dict:
                 )
             else:
                 # Case 4: TYPE=<type>;ENCODING=b
-                tag_type = (
-                    multimedia_tag_line_split[1]
-                    .split(TYPE_ASSIGNMENT_OR_LABEL_SEPARATOR)[1]
-                )
-                tag_data = (
-                    multimedia_tag_line_split[2]
-                    .split(KEY_VALUE_SEPARATOR)[1]
-                )
+                tag_type = multimedia_tag_line_split[1].split(
+                    TYPE_ASSIGNMENT_OR_LABEL_SEPARATOR
+                )[1]
+                tag_data = multimedia_tag_line_split[2].split(KEY_VALUE_SEPARATOR)[1]
         else:
             # Case 2: TYPE;ENCODING=BASE64
-            tag_type = (
-                multimedia_tag_line_split[2]
-                .split(KEY_VALUE_SEPARATOR)[0]
-            )
-            tag_data = (
-                multimedia_tag_line_split[-1]
-                .split(KEY_VALUE_SEPARATOR)[1]
-            )
+            tag_type = multimedia_tag_line_split[2].split(KEY_VALUE_SEPARATOR)[0]
+            tag_data = multimedia_tag_line_split[-1].split(KEY_VALUE_SEPARATOR)[1]
 
     elif len(multimedia_tag_line_split) == 2:
         # Case 1, 3, 5, or 6
@@ -428,10 +440,9 @@ def parse_multimedia_tag(multimedia_tag_line: str) -> dict:
             multimedia_type_decl_split = multimedia_tag_line_split[1].split(
                 KEY_VALUE_SEPARATOR
             )
-            tag_type = (
-                multimedia_type_decl_split[0]
-                .split(TYPE_ASSIGNMENT_OR_LABEL_SEPARATOR)[1]
-            )
+            tag_type = multimedia_type_decl_split[0].split(
+                TYPE_ASSIGNMENT_OR_LABEL_SEPARATOR
+            )[1]
             tag_url = multimedia_type_decl_split[1]
 
         elif multimedia_tag_line_split[1].startswith("MEDIATYPE"):
@@ -439,18 +450,14 @@ def parse_multimedia_tag(multimedia_tag_line: str) -> dict:
             multimedia_mediatype_decl_split = multimedia_tag_line_split[1].split(
                 KEY_VALUE_SEPARATOR
             )
-            tag_mime_type = (
-                multimedia_mediatype_decl_split[0]
-                .split(TYPE_ASSIGNMENT_OR_LABEL_SEPARATOR)[1]
-            )
+            tag_mime_type = multimedia_mediatype_decl_split[0].split(
+                TYPE_ASSIGNMENT_OR_LABEL_SEPARATOR
+            )[1]
             tag_url = multimedia_mediatype_decl_split[1]
 
         elif multimedia_tag_line_split[1].startswith("base64"):
             # Case 6: data:mime;base64,data
-            tag_mime_type = (
-                multimedia_tag_line_split[0]
-                .split(KEY_VALUE_SEPARATOR)[-1]
-            )
+            tag_mime_type = multimedia_tag_line_split[0].split(KEY_VALUE_SEPARATOR)[-1]
             tag_data = multimedia_tag_line_split[1].split(",")[1]
 
         else:
@@ -462,39 +469,38 @@ def parse_multimedia_tag(multimedia_tag_line: str) -> dict:
             tag_url = ":".join(tag_type_and_url_split[1:])
 
     else:
-        raise ValueError(
-            f"Can't parse multimedia tag: '{multimedia_tag_line}'"
-        )
-    
+        raise ValueError(f"Can't parse multimedia tag: '{multimedia_tag_line}'")
+
     return helper_match_subkey_types_and_values(
         vcard_multimedia_helper.get_multimedia_tag_list(),
         [tag_type, tag_data, tag_url, tag_mime_type],
-        contains_tag_name=False
+        contains_tag_name=False,
     )
 
 
 # Helper functions
 
+
 def helper_match_subkey_types_and_values(
     subkey_names: typing.List[str],
     values: typing.List[str],
-    contains_tag_name: bool = True
+    contains_tag_name: bool = True,
 ) -> dict:
     """
     Match subkey names with their corresponding values into a dictionary.
-    
+
     Given lists of labels and values, creates a dictionary mapping labels
     to values, filtering out empty values.
-    
+
     Args:
         subkey_names: List of field names (e.g., ["family_name", "given_name"])
         values: List of corresponding values
         contains_tag_name: If True, assumes first value contains tag name
                           and extracts the actual value after the colon
-                          
+
     Returns:
         Dictionary mapping non-empty subkeys to their values
-        
+
     Raises:
         ValueError: If the number of subkeys doesn't match the number of values
     """
@@ -507,7 +513,7 @@ def helper_match_subkey_types_and_values(
             f"Contents of line don't match specifications! "
             f"Only {len(values)} subfields found, but {len(subkey_names)} are required"
         )
-    
+
     # Create pairs of (name, value) for non-empty values
     label_and_data_pairs = tuple(
         (name, value) for name, value in zip(subkey_names, values) if value
@@ -524,13 +530,13 @@ def helper_match_subkey_types_and_values(
 def helper_match_generic_label_and_types(text_line: str) -> dict:
     """
     Parse a generic vCard line with TYPE parameter.
-    
+
     Handles lines of the form: <KEY>;TYPE=<KEY_TYPE>:<KEY_DATA>
     or <KEY>;<KEY_TYPE>:<KEY_DATA>
-    
+
     Args:
         text_line: vCard line to parse
-        
+
     Returns:
         Dictionary with type as key and data as value
         Example: {"INTERNET": "email@example.com"}

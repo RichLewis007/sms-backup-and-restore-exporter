@@ -5,6 +5,7 @@ This module provides utilities for extracting and decoding multimedia content
 from vCard files. It handles Base64-encoded data and URL-based media for
 PHOTO, SOUND, LOGO, and KEY fields.
 """
+
 import base64
 from typing import List
 
@@ -20,10 +21,10 @@ MULTIMEDIA_TAG_TAG_MIME_TYPE_KEY = "tag_mime_type"
 def get_advanced_key_names() -> List[str]:
     """
     Get list of vCard field names that may contain multiline multimedia content.
-    
+
     These fields (PHOTO, SOUND, LOGO, KEY) can span multiple lines in VCF files
     and require special handling during parsing.
-    
+
     Returns:
         List of field names: ["KEY", "LOGO", "PHOTO", "SOUND"]
     """
@@ -33,7 +34,7 @@ def get_advanced_key_names() -> List[str]:
 def get_multimedia_tag_list() -> List[str]:
     """
     Get list of multimedia tag attribute keys.
-    
+
     Returns:
         List of keys used in multimedia tag dictionaries:
         ["tag_type", "tag_data", "tag_url", "tag_mime_type"]
@@ -49,14 +50,14 @@ def get_multimedia_tag_list() -> List[str]:
 def extract_key_multimedia(contact: dict, base_filename: str) -> None:
     """
     Extract and save multimedia content from a contact.
-    
+
     Searches for PHOTO, SOUND, LOGO, and KEY fields in the contact dictionary
     and extracts them to files. Handles both Base64-encoded data and URLs.
-    
+
     Args:
         contact: Dictionary containing parsed contact data
         base_filename: Base filename (without extension) for the output file
-                      
+
     Raises:
         Exception: If file extension cannot be determined from multimedia data
         Exception: If URL download fails
@@ -85,7 +86,7 @@ def extract_key_multimedia(contact: dict, base_filename: str) -> None:
 
         # Check if media is URL-based or Base64-encoded
         is_url = MULTIMEDIA_TAG_TAG_URL_KEY in contact[key_name]
-        
+
         if is_url:
             data_or_url = contact[key_name][MULTIMEDIA_TAG_TAG_URL_KEY]
         else:
@@ -99,19 +100,19 @@ def decode_multimedia_data_field(
 ) -> None:
     """
     Decode and save multimedia data from Base64 or URL.
-    
+
     If is_url is True, downloads the media from the URL.
     Otherwise, decodes Base64-encoded data.
-    
+
     Args:
         data_or_url: Either a URL string or Base64-encoded data string
         is_url: True if data_or_url is a URL, False if it's Base64 data
         output_filename: Path where the decoded file should be saved
-        
+
     Raises:
         Exception: If URL download fails or Base64 decoding fails
     """
-    with open(output_filename, 'wb') as file_handle:
+    with open(output_filename, "wb") as file_handle:
         if is_url:
             # Download from URL
             response = requests.get(data_or_url, stream=True)
