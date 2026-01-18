@@ -36,7 +36,7 @@ def get_human_readable_duration(duration_raw_s: str) -> str:
     return formatted_str
 
 
-def create_call_log(calls_xml_dir) -> None:
+def create_call_log(calls_xml_dir: str, output_dir: str = None) -> None:
 
     all_calls_list = []
 
@@ -103,8 +103,18 @@ def create_call_log(calls_xml_dir) -> None:
             f'[DEBUG] Finished processing file {filename} .. now at {num_calls} calls total')
 
     # All calls have been created. Now write the entire log to csv file
+    if output_dir is None:
+        output_dir = os.getcwd()
+    else:
+        os.makedirs(output_dir, exist_ok=True)
+    
+    output_file = os.path.join(output_dir, 'call_log.csv')
 
-    with open('call_log.csv', 'w') as csv_file_handle:
+    if not all_calls_list:
+        print("No calls found to write to call log.")
+        return
+
+    with open(output_file, 'w', newline='') as csv_file_handle:
         csv_writer = csv.writer(csv_file_handle)
 
         # Write the header
@@ -112,3 +122,5 @@ def create_call_log(calls_xml_dir) -> None:
 
         for call_entry in sorted(all_calls_list, key=lambda k: k[call_timestamp_key_name]):
             csv_writer.writerow(list(call_entry.values()))
+    
+    print(f"Call log written to {output_file}")
