@@ -1,10 +1,34 @@
 import argparse
+import os
 from argparse import RawTextHelpFormatter
 
 # locals
 from . import call_log_generator
 from . import mms_media_extractor
 from . import contacts_vcard_extractor
+
+
+def normalize_path(path: str) -> str:
+    """
+    Normalize a file path to handle various input formats:
+    - Expands ~ to home directory
+    - Resolves relative paths (./local/, ../parent/)
+    - Normalizes path separators
+    - Returns absolute path
+    
+    Args:
+        path: Input path string
+        
+    Returns:
+        Normalized absolute path string
+    """
+    # Expand ~ to home directory
+    path = os.path.expanduser(path)
+    # Normalize path separators and resolve .. and .
+    path = os.path.normpath(path)
+    # Convert to absolute path
+    path = os.path.abspath(path)
+    return path
 
 
 def main():
@@ -45,18 +69,22 @@ def main():
 
     argparse_args = argparse_parser.parse_args()
 
+    # Normalize input and output paths to handle relative paths, ~ expansion, etc.
+    input_dir = normalize_path(argparse_args.input_dir)
+    output_dir = normalize_path(argparse_args.output_dir)
+
     if argparse_args.backup_type == "sms":
         mms_media_extractor.reconstruct_mms_media(
-            argparse_args.input_dir, argparse_args.output_dir,
+            input_dir, output_dir,
             argparse_args.no_images, argparse_args.no_videos,
             argparse_args.no_audio, argparse_args.no_pdfs)
 
     elif argparse_args.backup_type == "calls":
-        call_log_generator.create_call_log(argparse_args.input_dir, argparse_args.output_dir)
+        call_log_generator.create_call_log(input_dir, output_dir)
 
     elif argparse_args.backup_type == "vcf":
         contacts_vcard_extractor.parse_contacts_from_vcf_files(
-            argparse_args.input_dir, argparse_args.output_dir)
+            input_dir, output_dir)
 
 
 if __name__ == "__main__":

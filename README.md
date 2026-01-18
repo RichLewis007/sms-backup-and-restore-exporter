@@ -77,8 +77,12 @@ This installs the package in editable mode so you can use `backup-extractor` dir
 
 ## Steps
 
-* Make sure the backups files start with either `sms-` or `calls-`, have the `.xml` extension, and are in their own directory.
-* Make sure the contacts files all end in `.vcf` and are in their own directory
+* **Input must be a directory**, not a single file. Place your backup XML files in a directory:
+  * For SMS/MMS backups: Files should start with `sms-` and have the `.xml` extension (e.g., `sms-20231219123456.xml`)
+  * For call logs: Files should start with `calls-` and have the `.xml` extension (e.g., `calls-20231219123456.xml`)
+  * For contacts: Files should have the `.vcf` extension (e.g., `contacts.vcf` or `backup.vcf`)
+* If you have a single backup file, place it in its own directory before running the extractor
+* The output directory will be created automatically if it doesn't exist
 
 ## Usage
 
@@ -93,7 +97,7 @@ Or if you installed with `pip install -e .`, you can use `backup-extractor` dire
 **Options:**
   - `-h, --help`            show this help message and exit
   - `-i INPUT_DIR, --input-dir INPUT_DIR`
-                        The directory where XML files (for calls or messages) are located
+                        **Directory** containing XML or VCF files (not a single file). The extractor will process all matching files in this directory.
   - `-t BACKUP_TYPE, --backup-type BACKUP_TYPE`
                         The type of extraction. Either 'sms' for message media files, or 'calls' to create a call log, or 'vcf' to extract media from a VCF/vCard file
   - `-o OUTPUT_DIR, --output-dir OUTPUT_DIR`
