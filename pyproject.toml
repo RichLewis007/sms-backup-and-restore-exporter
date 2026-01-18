@@ -3,7 +3,7 @@ name = "sms-backup-restore-extractor"
 version = "2.0.0"
 description = "Extract media files, call logs, or vcf/vCard media from SMS Backup & Restore backup archives"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.15"
 dependencies = [
     "certifi>=2024.8.30",
     "charset-normalizer>=3.4.0",
