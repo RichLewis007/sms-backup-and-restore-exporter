@@ -2,28 +2,27 @@ import argparse
 from argparse import RawTextHelpFormatter
 
 # locals
-import src.call_log_generator
-import src.mms_media_extractor
-import src.contacts_vcard_extractor
+from . import call_log_generator
+from . import mms_media_extractor
+from . import contacts_vcard_extractor
 
 
 def main():
-
     argparse_parser = argparse.ArgumentParser(
         description="Extracts media files, call logs, or vcf/vCard media, from an SMS Backup & Restore backup archive.",
         formatter_class=RawTextHelpFormatter,
         epilog='''Examples:
   To extract all MMS media attachments:
-     backup_extractor.py -t sms -i input_dir -o output_dir
+     backup-extractor -t sms -i input_dir -o output_dir
 
   To extract only Video files:
-     backup_extractor.py -t sms -i input_dir -o output_dir --no-images --no-audio --no-pdfs
+     backup-extractor -t sms -i input_dir -o output_dir --no-images --no-audio --no-pdfs
 
   To extract a de-duplicated call log:
-     backup_extractor.py -t calls -i input_dir -o output_dir
+     backup-extractor -t calls -i input_dir -o output_dir
 
   To extract VCF/vCard media:
-     backup_extractor.py -t vcf -i input_dir -o output_dir
+     backup-extractor -t vcf -i input_dir -o output_dir
  
 '''
     )
@@ -46,17 +45,17 @@ def main():
 
     argparse_args = argparse_parser.parse_args()
 
-    if (argparse_args.backup_type == "sms"):
-        src.mms_media_extractor.reconstruct_mms_media(
+    if argparse_args.backup_type == "sms":
+        mms_media_extractor.reconstruct_mms_media(
             argparse_args.input_dir, argparse_args.output_dir,
             argparse_args.no_images, argparse_args.no_videos,
             argparse_args.no_audio, argparse_args.no_pdfs)
 
-    elif (argparse_args.backup_type == "calls"):
-        src.call_log_generator.create_call_log(argparse_args.input_dir, argparse_args.output_dir)
+    elif argparse_args.backup_type == "calls":
+        call_log_generator.create_call_log(argparse_args.input_dir, argparse_args.output_dir)
 
-    elif (argparse_args.backup_type == "vcf"):
-        src.contacts_vcard_extractor.parse_contacts_from_vcf_files(
+    elif argparse_args.backup_type == "vcf":
+        contacts_vcard_extractor.parse_contacts_from_vcf_files(
             argparse_args.input_dir, argparse_args.output_dir)
 
 

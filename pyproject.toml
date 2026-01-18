@@ -14,11 +14,14 @@ dependencies = [
 ]
 
 [project.scripts]
-backup-extractor = "backup_extractor:main"
+backup-extractor = "src.backup_extractor:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.uv]
-dev-dependencies = []
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[dependency-groups]
+dev = []

@@ -74,36 +74,52 @@ pip install -r requirements.txt
 
 ## Usage
 
+After installing with `uv sync`, you can use the `backup-extractor` command:
+
+```bash
+backup-extractor [-h] [-i INPUT_DIR] [-t BACKUP_TYPE] [-o OUTPUT_DIR] [--no-images] [--no-videos] [--no-audio] [--no-pdfs]
 ```
-usage: backup_extractor.py [-h] [-i INPUT_DIR] [-t BACKUP_TYPE] [-o OUTPUT_DIR] [--no-images] [--no-videos] [--no-audio] [--no-pdfs]
 
-options:
-  -h, --help            show this help message and exit
-  -i INPUT_DIR, --input-dir INPUT_DIR
+**Options:**
+  - `-h, --help`            show this help message and exit
+  - `-i INPUT_DIR, --input-dir INPUT_DIR`
                         The directory where XML files (for calls or messages) are located
-  -t BACKUP_TYPE, --backup-type BACKUP_TYPE
+  - `-t BACKUP_TYPE, --backup-type BACKUP_TYPE`
                         The type of extraction. Either 'sms' for message media files, or 'calls' to create a call log, or 'vcf' to extract media from a VCF/vCard file
-  -o OUTPUT_DIR, --output-dir OUTPUT_DIR
+  - `-o OUTPUT_DIR, --output-dir OUTPUT_DIR`
                         The directory where media files that are found, will be extracted to
-  --no-images           Don't extract image files from messages
-  --no-videos           Don't extract video files from messages
-  --no-audio            Don't extract audio files from messages
-  --no-pdfs             Don't extract PDF files from messages
+  - `--no-images`           Don't extract image files from messages
+  - `--no-videos`           Don't extract video files from messages
+  - `--no-audio`            Don't extract audio files from messages
+  - `--no-pdfs`             Don't extract PDF files from messages
 
-Examples:
+**Examples:**
+
   To extract all MMS media attachments:
-     backup_extractor.py -t sms -i input_dir -o output_dir
+  ```bash
+  backup-extractor -t sms -i input_dir -o output_dir
+  ```
 
   To extract only Video files:
-     backup_extractor.py -t sms -i input_dir -o output_dir --no-images --no-audio --no-pdfs
+  ```bash
+  backup-extractor -t sms -i input_dir -o output_dir --no-images --no-audio --no-pdfs
+  ```
 
   To extract a de-duplicated call log:
-     backup_extractor.py -t calls -i input_dir -o output_dir
+  ```bash
+  backup-extractor -t calls -i input_dir -o output_dir
+  ```
 
   To extract VCF/vCard media:
-     backup_extractor.py -t vcf -i input_dir -o output_dir
+  ```bash
+  backup-extractor -t vcf -i input_dir -o output_dir
+  ```
 
+**Alternative:** You can also run the module directly with Python:
+```bash
+python -m src.backup_extractor -t sms -i input_dir -o output_dir
 ```
+
 
 ## Output info
 
