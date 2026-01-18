@@ -1,8 +1,8 @@
-![app-store-listing-image](https://images-na.ssl-images-amazon.com/images/I/71VnjnwSr4L.png)
+![SMS Backup & Restore Exporter Banner](images/sms-backup-and-restore-banner.png)
 
-# SMS Backup & Restore Extractor
+# SMS Backup & Restore Exporter
 
-> Extract media files, call logs, and contact media from SMS Backup & Restore backup archives
+> Export media files, call logs, and contact media from SMS Backup & Restore backup archives
 
 [![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -30,9 +30,13 @@
 
 ## 🎯 Overview
 
-The [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore&hl=en_US) app (official name: `com.riteshsahu.SMSBackupRestore`) allows you to backup your entire SMS history, call logs, and contacts from Android devices. While the app provides an [online viewer](https://www.synctech.com.au/sms-backup-restore/view-backup/) for viewing backups, **extracting the actual data** from these backups can be challenging.
+The [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore&hl=en_US) app (official name: `com.riteshsahu.SMSBackupRestore`) allows you to backup your entire SMS history, call logs, and contacts from Android devices. While the app provides an [online viewer](https://www.synctech.com.au/sms-backup-restore/view-backup/) for viewing backups, **exporting the actual data** from these backups can be challenging.
 
-**This tool solves that problem** by providing a powerful, command-line utility to extract:
+**This tool solves that problem** by providing a powerful, command-line utility to export data from SMS Backup & Restore archives. It can extract:
+
+> **Note:** This application is based upon the original code from [@raleighlittles](https://github.com/raleighlittles) ([original repository](https://github.com/raleighlittles/SMS-backup-and-restore-extractor)) and has been greatly expanded and improved upon. The original concept and v1 implementation were created by Raleigh Littles, and this version 2.0 represents a complete modernization with enhanced functionality, better error handling, comprehensive testing, and modern Python tooling.
+
+**Features include:**
 - 📸 **Media files** from MMS messages (images, videos, audio, PDFs)
 - 📞 **Call logs** as structured CSV files
 - 👤 **Contact media** from VCF/vCard files (photos, sounds, logos, keys)
@@ -89,8 +93,8 @@ The [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.rit
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Clone the repository
-git clone https://github.com/RichLewis007/SMS-backup-and-restore-extractor.git
-cd SMS-backup-and-restore-extractor
+git clone https://github.com/RichLewis007/sms-backup-and-restore-exporter.git
+cd sms-backup-and-restore-exporter
 
 # Install dependencies and the package
 uv sync
@@ -100,8 +104,8 @@ uv sync
 
 ```bash
 # Clone the repository
-git clone https://github.com/RichLewis007/SMS-backup-and-restore-extractor.git
-cd SMS-backup-and-restore-extractor
+git clone https://github.com/RichLewis007/sms-backup-and-restore-exporter.git
+cd sms-backup-and-restore-exporter
 
 # Install in editable mode
 pip install -e .
@@ -118,17 +122,17 @@ pip install -e .
 
 2. **Extract MMS media**:
    ```bash
-   uv run backup-extractor -t sms -i ~/backups -o ~/extracted_media
+   uv run xml-backup-exporter -t sms -i ~/backups -o ~/extracted_media
    ```
 
 3. **Generate call log**:
    ```bash
-   uv run backup-extractor -t calls -i ~/backups -o ~/call_logs
+   uv run xml-backup-exporter -t calls -i ~/backups -o ~/call_logs
    ```
 
 4. **Extract contact media**:
    ```bash
-   uv run backup-extractor -t vcf -i ~/backups -o ~/contact_media
+   uv run xml-backup-exporter -t vcf -i ~/backups -o ~/contact_media
    ```
 
 ---
@@ -138,7 +142,7 @@ pip install -e .
 ### Basic Command Syntax
 
 ```bash
-uv run backup-extractor [-h] -t BACKUP_TYPE -i INPUT_DIR -o OUTPUT_DIR [OPTIONS]
+uv run xml-backup-exporter [-h] -t BACKUP_TYPE -i INPUT_DIR -o OUTPUT_DIR [OPTIONS]
 ```
 
 ### Command-Line Options
@@ -190,7 +194,7 @@ The output directory will be **automatically created** if it doesn't exist. You 
 Extract all images, videos, audio, and PDFs from SMS backups:
 
 ```bash
-uv run backup-extractor -t sms -i ~/backups -o ~/extracted_media
+uv run xml-backup-exporter -t sms -i ~/backups -o ~/extracted_media
 ```
 
 ### Extract Only Videos
@@ -198,14 +202,14 @@ uv run backup-extractor -t sms -i ~/backups -o ~/extracted_media
 Extract only video files, excluding images, audio, and PDFs:
 
 ```bash
-uv run backup-extractor -t sms -i ~/backups -o ~/videos \
+uv run xml-backup-exporter -t sms -i ~/backups -o ~/videos \
   --no-images --no-audio --no-pdfs
 ```
 
 ### Extract Images and PDFs Only
 
 ```bash
-uv run backup-extractor -t sms -i ~/backups -o ~/media \
+uv run xml-backup-exporter -t sms -i ~/backups -o ~/media \
   --no-videos --no-audio
 ```
 
@@ -214,7 +218,7 @@ uv run backup-extractor -t sms -i ~/backups -o ~/media \
 Create a deduplicated call log from all call backup files:
 
 ```bash
-uv run backup-extractor -t calls -i ~/backups -o ~/call_logs
+uv run xml-backup-exporter -t calls -i ~/backups -o ~/call_logs
 ```
 
 The output will be a file named `call_log.csv` in the output directory.
@@ -224,7 +228,7 @@ The output will be a file named `call_log.csv` in the output directory.
 Extract photos, sounds, logos, and keys from contact backup files:
 
 ```bash
-uv run backup-extractor -t vcf -i ~/backups -o ~/contact_media
+uv run xml-backup-exporter -t vcf -i ~/backups -o ~/contact_media
 ```
 
 ### Using a Single File as Input
@@ -232,7 +236,7 @@ uv run backup-extractor -t vcf -i ~/backups -o ~/contact_media
 The tool automatically detects if you provide a file instead of a directory:
 
 ```bash
-uv run backup-extractor -t sms -i ~/backups/sms-20231219.xml -o ~/output
+uv run xml-backup-exporter -t sms -i ~/backups/sms-20231219.xml -o ~/output
 # Note: Will use ~/backups/ as the input directory
 ```
 
@@ -242,17 +246,17 @@ If you installed with `pip install -e .`:
 
 ```bash
 # Direct command (no 'uv run' needed)
-backup-extractor -t sms -i ~/backups -o ~/output
+xml-backup-exporter -t sms -i ~/backups -o ~/output
 ```
 
 Or run as a Python module:
 
 ```bash
 # Using Python directly
-python -m src.backup_extractor -t sms -i ~/backups -o ~/output
+python -m src.xml_backup_exporter -t sms -i ~/backups -o ~/output
 
 # Using uv with Python module
-uv run python -m src.backup_extractor -t sms -i ~/backups -o ~/output
+uv run python -m src.xml_backup_exporter -t sms -i ~/backups -o ~/output
 ```
 
 ---
@@ -314,7 +318,7 @@ Call Date (timestamp),Call date,Call type,Caller name,Caller #,Call duration (s)
 ls ~/backups
 
 # Use the correct path
-uv run backup-extractor -t sms -i ~/backups -o ~/output
+uv run xml-backup-exporter -t sms -i ~/backups -o ~/output
 ```
 
 #### "No calls found to write to call log"
@@ -333,11 +337,11 @@ uv run backup-extractor -t sms -i ~/backups -o ~/output
 **Solution:** Try using absolute paths or ensure relative paths are correct:
 ```bash
 # Use absolute path
-uv run backup-extractor -t sms -i /full/path/to/backups -o /full/path/to/output
+uv run xml-backup-exporter -t sms -i /full/path/to/backups -o /full/path/to/output
 
 # Or navigate to the directory first
 cd ~/backups
-uv run backup-extractor -t sms -i . -o ../output
+uv run xml-backup-exporter -t sms -i . -o ../output
 ```
 
 #### Python version issues
@@ -393,9 +397,9 @@ uv run pytest tests/ --cov=src --cov-report=html
 ### Project Structure
 
 ```
-SMS-backup-and-restore-extractor/
+sms-backup-and-restore-exporter/
 ├── src/                          # Source code
-│   ├── backup_extractor.py      # Main entry point
+│   ├── xml_backup_exporter.py   # Main entry point
 │   ├── mms_media_extractor.py   # MMS media extraction
 │   ├── call_log_generator.py    # Call log CSV generation
 │   ├── contacts_vcard_extractor.py  # VCF/vCard parsing
@@ -451,11 +455,32 @@ When reporting bugs or requesting features, please include:
 
 This project is licensed under the **MIT License** - see the [LICENSE.md](LICENSE.md) file for details.
 
+### Disclaimer
+
+Although the authors have endeavored to create a quality utility and test the code thoroughly, they cannot be held responsible for any damages, data loss, or issues that may arise from the use of this software. This software is provided "as is" without warranty of any kind, express or implied, as detailed in the MIT License. Users are encouraged to test the software with non-critical data first and maintain backups of their original files.
+
 ---
 
 ## 🙏 Acknowledgments
 
-- Original project by [raleighlittles](https://github.com/raleighlittles)
+**Credits:**
+- Original idea and v1 code: Raleigh Littles - GitHub: [@raleighlittles](https://github.com/raleighlittles)
+- Updated and upgraded v2 app: Rich Lewis - GitHub: [@RichLewis007](https://github.com/RichLewis007)
+
+This application is based upon the original code from [@raleighlittles](https://github.com/raleighlittles) and has been greatly expanded and improved upon with modern Python tooling, comprehensive testing, enhanced error handling, and improved documentation.
+
+**Original v1 Source:**
+The original v1 source code can be found at [https://github.com/raleighlittles/SMS-backup-and-restore-extractor](https://github.com/raleighlittles/SMS-backup-and-restore-extractor). Original contributors to the v1 repository include:
+- Raleigh Littles - [@raleighlittles](https://github.com/raleighlittles)
+- ImperialCodeMonkey - [@barretto94](https://github.com/barretto94)
+- [@king44444](https://github.com/king44444)
+
+**Supporting the Original Author:**
+If you appreciate the original work that this project is based on, please consider supporting the original author:
+- PayPal: [paypal.me/raleighlittles](https://paypal.me/raleighlittles)
+- Buy Me a Coffee: [https://www.buymeacoffee.com/raleighlittles](https://www.buymeacoffee.com/raleighlittles)
+
+**Additional Thanks:**
 - Built with [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore) backup format
 - Powered by modern Python tooling: [uv](https://github.com/astral-sh/uv), [lxml](https://lxml.de/), [pytest](https://pytest.org/)
 
@@ -492,4 +517,4 @@ Future enhancements planned:
 
 **Version 2.0.0** - Modernized and enhanced for 2026 🚀
 
-For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/RichLewis007/SMS-backup-and-restore-extractor).
+For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/RichLewis007/sms-backup-and-restore-exporter).

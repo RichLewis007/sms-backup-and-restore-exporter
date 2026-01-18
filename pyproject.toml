@@ -1,7 +1,7 @@
 [project]
-name = "sms-backup-restore-extractor"
+name = "sms-backup-restore-exporter"
 version = "2.0.0"
-description = "Extract media files, call logs, or vcf/vCard media from SMS Backup & Restore backup archives"
+description = "Export media files, call logs, or vcf/vCard media from SMS Backup & Restore backup archives"
 readme = "README.md"
 requires-python = ">=3.8,<3.15"
 license = {text = "MIT"}
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-backup-extractor = "src.backup_extractor:main"
+xml-backup-exporter = "src.xml_backup_exporter:main"
 
 [build-system]
 requires = ["hatchling"]

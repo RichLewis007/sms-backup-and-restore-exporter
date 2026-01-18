@@ -5,12 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **BREAKING**: Renamed command from `backup-extractor` to `xml-backup-exporter`
+- **BREAKING**: Renamed main module from `backup_extractor.py` to `xml_backup_exporter.py`
+- Updated README with detailed description acknowledging original work by @raleighlittles
+- Added credits throughout source code and documentation
+
+### Added
+- Comprehensive module-level docstrings for all source files
+- Detailed function documentation with Args, Returns, and Examples
+- Improved inline comments explaining complex logic
+- Package-level documentation in `__init__.py` with version information
+
+### Changed
+- **Refactored vCard/VCF parser** for improved maintainability and code quality
+  - Replaced long if/elif chain with dispatch dictionary pattern
+  - Improved error handling (replaced `sys.exit()` with proper exceptions)
+  - Removed debug print statements, kept essential status messages
+  - Better code organization with helper functions and clear separation of concerns
+  - Enhanced type hints and documentation
+  - Improved variable naming and code style
+- Enhanced documentation across all source files:
+  - Added module docstrings explaining purpose and functionality
+  - Improved function docstrings with detailed parameter descriptions
+  - Added usage examples in docstrings where helpful
+  - Better code comments for maintainability
+
+### Fixed
+- Fixed potential index errors in multiline multimedia parsing
+- Better error messages for malformed VCF files
+
 ## [2.0.0] - 2024-12-19
 
 ### Added
 - Modern `pyproject.toml` configuration for uv and pip package management
 - `.gitignore` file with comprehensive Python project exclusions
-- Entry point script `backup-extractor` for easy command-line usage
+- Entry point script `xml-backup-exporter` for easy command-line usage
 - Improved error handling with clear messages for missing directories
 - Support for `uv` tooling as the primary package manager
 - Dependency groups configuration using modern `[dependency-groups]` format

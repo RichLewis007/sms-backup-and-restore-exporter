@@ -1,11 +1,11 @@
-"""Tests for backup_extractor module."""
+"""Tests for xml_backup_exporter module."""
 import os
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-from src.backup_extractor import normalize_path
+from src.xml_backup_exporter import normalize_path
 
 
 class TestNormalizePath:
@@ -55,45 +55,45 @@ class TestNormalizePath:
         result = normalize_path(test_path)
         assert os.path.normpath(test_path) in str(result)
 
-    @patch('src.backup_extractor.mms_media_extractor')
-    @patch('src.backup_extractor.call_log_generator')
-    @patch('src.backup_extractor.contacts_vcard_extractor')
-    @patch('sys.argv', ['backup-extractor', '-t', 'sms', '-i', '/test/input', '-o', '/test/output'])
+    @patch('src.xml_backup_exporter.mms_media_extractor')
+    @patch('src.xml_backup_exporter.call_log_generator')
+    @patch('src.xml_backup_exporter.contacts_vcard_extractor')
+    @patch('sys.argv', ['xml-backup-exporter', '-t', 'sms', '-i', '/test/input', '-o', '/test/output'])
     def test_main_sms_extraction(self, mock_vcf, mock_calls, mock_sms):
         """Test main function with sms backup type."""
-        from src.backup_extractor import main
+        from src.xml_backup_exporter import main
         
-        with patch('src.backup_extractor.normalize_path', side_effect=lambda x: x):
+        with patch('src.xml_backup_exporter.normalize_path', side_effect=lambda x: x):
             with patch('os.path.isfile', return_value=False):
                 with patch('os.path.isdir', return_value=True):
                     main()
         
         mock_sms.reconstruct_mms_media.assert_called_once()
 
-    @patch('src.backup_extractor.mms_media_extractor')
-    @patch('src.backup_extractor.call_log_generator')
-    @patch('src.backup_extractor.contacts_vcard_extractor')
-    @patch('sys.argv', ['backup-extractor', '-t', 'calls', '-i', '/test/input', '-o', '/test/output'])
+    @patch('src.xml_backup_exporter.mms_media_extractor')
+    @patch('src.xml_backup_exporter.call_log_generator')
+    @patch('src.xml_backup_exporter.contacts_vcard_extractor')
+    @patch('sys.argv', ['xml-backup-exporter', '-t', 'calls', '-i', '/test/input', '-o', '/test/output'])
     def test_main_calls_extraction(self, mock_vcf, mock_calls, mock_sms):
         """Test main function with calls backup type."""
-        from src.backup_extractor import main
+        from src.xml_backup_exporter import main
         
-        with patch('src.backup_extractor.normalize_path', side_effect=lambda x: x):
+        with patch('src.xml_backup_exporter.normalize_path', side_effect=lambda x: x):
             with patch('os.path.isfile', return_value=False):
                 with patch('os.path.isdir', return_value=True):
                     main()
         
         mock_calls.create_call_log.assert_called_once()
 
-    @patch('src.backup_extractor.mms_media_extractor')
-    @patch('src.backup_extractor.call_log_generator')
-    @patch('src.backup_extractor.contacts_vcard_extractor')
-    @patch('sys.argv', ['backup-extractor', '-t', 'vcf', '-i', '/test/input', '-o', '/test/output'])
+    @patch('src.xml_backup_exporter.mms_media_extractor')
+    @patch('src.xml_backup_exporter.call_log_generator')
+    @patch('src.xml_backup_exporter.contacts_vcard_extractor')
+    @patch('sys.argv', ['xml-backup-exporter', '-t', 'vcf', '-i', '/test/input', '-o', '/test/output'])
     def test_main_vcf_extraction(self, mock_vcf, mock_calls, mock_sms):
         """Test main function with vcf backup type."""
-        from src.backup_extractor import main
+        from src.xml_backup_exporter import main
         
-        with patch('src.backup_extractor.normalize_path', side_effect=lambda x: x):
+        with patch('src.xml_backup_exporter.normalize_path', side_effect=lambda x: x):
             with patch('os.path.isfile', return_value=False):
                 with patch('os.path.isdir', return_value=True):
                     main()
@@ -102,7 +102,7 @@ class TestNormalizePath:
 
     def test_main_handles_file_input(self, temp_dir):
         """Test that normalize_path correctly handles file paths."""
-        from src.backup_extractor import normalize_path
+        from src.xml_backup_exporter import normalize_path
         
         # Create a test file
         test_file = temp_dir / "test.xml"
