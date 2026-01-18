@@ -77,11 +77,15 @@ This installs the package in editable mode so you can use `backup-extractor` dir
 
 ## Steps
 
-* **Input must be a directory**, not a single file. Place your backup XML files in a directory:
-  * For SMS/MMS backups: Files should start with `sms-` and have the `.xml` extension (e.g., `sms-20231219123456.xml`)
-  * For call logs: Files should start with `calls-` and have the `.xml` extension (e.g., `calls-20231219123456.xml`)
+* **Input can be a directory or a single file**. If you specify a file, the program will automatically use its parent directory:
+  * For SMS/MMS backups: Files should start with `sms` and have the `.xml` extension (e.g., `sms-20231219123456.xml` or `sms.xml`)
+  * For call logs: Files should start with `calls` and have the `.xml` extension (e.g., `calls-20231219123456.xml`)
   * For contacts: Files should have the `.vcf` extension (e.g., `contacts.vcf` or `backup.vcf`)
-* If you have a single backup file, place it in its own directory before running the extractor
+* You can specify paths in various formats:
+  * `./local/` - relative directory path
+  * `./local/sms.xml` - relative file path (will use `./local/` directory)
+  * `~/backups/` - home directory expansion
+  * `/absolute/path/to/directory` - absolute path
 * The output directory will be created automatically if it doesn't exist
 
 ## Usage

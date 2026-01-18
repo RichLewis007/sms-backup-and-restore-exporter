@@ -70,8 +70,19 @@ def main():
     argparse_args = argparse_parser.parse_args()
 
     # Normalize input and output paths to handle relative paths, ~ expansion, etc.
-    input_dir = normalize_path(argparse_args.input_dir)
+    input_path = normalize_path(argparse_args.input_dir)
     output_dir = normalize_path(argparse_args.output_dir)
+
+    # If input is a file, extract its directory
+    # This allows users to specify either a directory or a single file
+    if os.path.isfile(input_path):
+        input_dir = os.path.dirname(input_path)
+        print(f"Note: Input is a file. Using parent directory: {input_dir}")
+    elif os.path.isdir(input_path):
+        input_dir = input_path
+    else:
+        # Path doesn't exist - let the extraction functions handle the error
+        input_dir = input_path
 
     if argparse_args.backup_type == "sms":
         mms_media_extractor.reconstruct_mms_media(
