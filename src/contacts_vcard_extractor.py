@@ -242,36 +242,58 @@ def _parse_vcf_file(file_path: str, output_media_dir: str) -> List[Dict]:
 
 def parse_contacts_from_vcf_files(vcf_files_dir: str, output_media_dir: str) -> None:
     """
-    Parse all VCF files in a directory and extract contact multimedia.
+    Parse VCF files and extract contact multimedia.
+
+    Processes either a single VCF file or all VCF files in a directory.
 
     Args:
-        vcf_files_dir: Directory containing VCF files
+        vcf_files_dir: Directory containing VCF files, or a single VCF file path
         output_media_dir: Directory where extracted multimedia files will be saved
     """
     if not os.path.exists(vcf_files_dir):
-        print(f"Error: Input directory does not exist: {vcf_files_dir}")
-        print("Please provide a valid directory path containing VCF/vCard files.")
-        return
-
-    if not os.path.isdir(vcf_files_dir):
-        print(f"Error: Input path is not a directory: {vcf_files_dir}")
+        print(f"Error: Input path does not exist: {vcf_files_dir}")
+        print("Please provide a valid directory or file path containing VCF/vCard files.")
         return
 
     # Ensure output directory exists
-    os.makedirs(output_media_dir, exist_ok=True)
+    try:
+        os.makedirs(output_media_dir, exist_ok=True)
+    except OSError as e:
+        print(f"Error: Cannot create output directory '{output_media_dir}': {e}")
+        print("Please check that:")
+        print("  - The path is correct and writable")
+        print("  - You have permission to create directories in the parent location")
+        print("  - The path doesn't point to a read-only file system")
+        return
 
     all_contacts = []
 
-    for filename in os.listdir(vcf_files_dir):
-        if not filename.endswith(".vcf"):
-            continue
+    # Determine files to process - single file or all matching files in directory
+    files_to_process = []
+    if os.path.isfile(vcf_files_dir):
+        # Single file specified - use only that file if it matches pattern
+        if vcf_files_dir.endswith(".vcf"):
+            files_to_process = [vcf_files_dir]
+        else:
+            print(f"Error: Input file '{vcf_files_dir}' does not match expected pattern (should end with '.vcf').")
+            return
+    elif os.path.isdir(vcf_files_dir):
+        # Directory specified - process all matching files
+        for filename in os.listdir(vcf_files_dir):
+            if not filename.endswith(".vcf"):
+                continue
+            file_path = os.path.join(vcf_files_dir, filename)
+            files_to_process.append(file_path)
+    else:
+        print(f"Error: Input path is neither a file nor a directory: {vcf_files_dir}")
+        return
 
-        file_path = os.path.join(vcf_files_dir, filename)
+    for file_path in files_to_process:
 
         try:
             contacts = _parse_vcf_file(file_path, output_media_dir)
             all_contacts.extend(contacts)
-            print(f"Parsed {filename}: {len(contacts)} contact(s) found")
+            print(f"Parsed {os.path.basename(file_path)}: {len(contacts)} contact(s) found")
         except ValueError as e:
             print(f"Error parsing {filename}: {e}")
             continue

@@ -76,12 +76,12 @@ def create_call_log(calls_xml_dir: str, output_dir: Optional[str] = None) -> Non
     Generate a deduplicated call log CSV from SMS Backup & Restore XML files.
 
     Uses lxml.etree.iterparse() for memory-efficient processing of large files.
-    Processes all XML files starting with "calls" in the input directory,
-    extracts call information including additional metadata fields, and writes
+    Processes either a single XML file or all XML files starting with "calls" in a directory.
+    Extracts call information including additional metadata fields, and writes
     a CSV file with deduplicated entries. Calls are deduplicated by timestamp.
 
     Args:
-        calls_xml_dir: Directory containing call backup XML files
+        calls_xml_dir: Directory containing call backup XML files, or a single XML file path
         output_dir: Directory where call_log.csv will be written
                    (defaults to current directory if None)
 
@@ -118,12 +118,28 @@ def create_call_log(calls_xml_dir: str, output_dir: Optional[str] = None) -> Non
     call_timestamp_key_name = "Call Date (timestamp)"
     num_calls = 0
 
-    # Process each call backup XML file
-    for filename in os.listdir(calls_xml_dir):
-        if not (filename.endswith(".xml") and filename.startswith("calls")):
-            continue
+    # Determine files to process - single file or all matching files in directory
+    files_to_process = []
+    if os.path.isfile(calls_xml_dir):
+        # Single file specified - use only that file if it matches pattern
+        if calls_xml_dir.endswith(".xml") and os.path.basename(calls_xml_dir).startswith("calls"):
+            files_to_process = [calls_xml_dir]
+        else:
+            print(f"Error: Input file '{calls_xml_dir}' does not match expected pattern (should be 'calls*.xml').")
+            return
+    elif os.path.isdir(calls_xml_dir):
+        # Directory specified - process all matching files
+        for filename in os.listdir(calls_xml_dir):
+            if not (filename.endswith(".xml") and filename.startswith("calls")):
+                continue
+            file_path = os.path.join(calls_xml_dir, filename)
+            files_to_process.append(file_path)
+    else:
+        print(f"Error: Input path is neither a file nor a directory: {calls_xml_dir}")
+        return
 
-        file_path = os.path.join(calls_xml_dir, filename)
+    # Process each call backup XML file
+    for file_path in files_to_process:
 
         # Use iterparse for memory-efficient XML parsing
         context = lxml.etree.iterparse(
@@ -217,7 +233,15 @@ def create_call_log(calls_xml_dir: str, output_dir: Optional[str] = None) -> Non
     if output_dir is None:
         output_dir = os.getcwd()
     else:
-        os.makedirs(output_dir, exist_ok=True)
+        try:
+            os.makedirs(output_dir, exist_ok=True)
+        except OSError as e:
+            print(f"Error: Cannot create output directory '{output_dir}': {e}")
+            print("Please check that:")
+            print("  - The path is correct and writable")
+            print("  - You have permission to create directories in the parent location")
+            print("  - The path doesn't point to a read-only file system")
+            return
 
     output_file = os.path.join(output_dir, "call_log.csv")
 

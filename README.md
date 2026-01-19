@@ -4,7 +4,7 @@
 
 > Export media files, call logs, and contact media from SMS Backup & Restore backup archives
 
-[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](CHANGELOG.md)
 
@@ -159,12 +159,12 @@ uv run xml-backup-exporter [-h] -t BACKUP_TYPE -i INPUT_DIR -o OUTPUT_DIR [OPTIO
 |--------|-------------|
 | `-h, --help` | Show help message and exit |
 | `-t, --backup-type` | Type of extraction: `sms-mms-media`, `sms-mms-text`, `calls`, or `vcf` |
-| `-i, --input-dir` | Directory containing XML or VCF files (can also be a single file) |
+| `-i, --input-dir` | Directory containing XML or VCF files (all matching files processed), or a single XML/VCF file (only that file processed) |
 | `-o, --output-dir` | Directory where extracted files will be saved |
-| `--no-images` | Don't extract image files (SMS only) |
-| `--no-videos` | Don't extract video files (SMS only) |
-| `--no-audio` | Don't extract audio files (SMS only) |
-| `--no-pdfs` | Don't extract PDF files (SMS only) |
+| `--no-images` | Don't extract image files from MMS messages (for `sms-mms-media` only) |
+| `--no-videos` | Don't extract video files from MMS messages (for `sms-mms-media` only) |
+| `--no-audio` | Don't extract audio files from MMS messages (for `sms-mms-media` only) |
+| `--no-pdfs` | Don't extract PDF files from MMS messages (for `sms-mms-media` only) |
 
 ### Input Path Formats
 
@@ -174,7 +174,7 @@ The tool accepts various path formats for maximum flexibility:
 # Relative directory
 -i ./local/
 
-# Relative file (uses parent directory automatically)
+# Relative file (processes only that file)
 -i ./local/sms.xml
 
 # Home directory expansion
@@ -187,7 +187,7 @@ The tool accepts various path formats for maximum flexibility:
 -i .
 ```
 
-> **Note:** If you specify a file path, the program will automatically use its parent directory.
+> **Note:** If you specify a file path, only that file will be processed. If you specify a directory, all matching XML/VCF files in that directory will be processed.
 
 ### Output Directory
 
@@ -254,11 +254,11 @@ uv run xml-backup-exporter -t vcf -i ~/backups -o ~/contact_media
 
 ### Using a Single File as Input
 
-The tool automatically detects if you provide a file instead of a directory:
+The tool can process a single file instead of all files in a directory:
 
 ```bash
 uv run xml-backup-exporter -t sms-mms-media -i ~/backups/sms-20231219.xml -o ~/output
-# Note: Will use ~/backups/ as the input directory
+# Note: Will process only sms-20231219.xml, not all files in the directory
 ```
 
 ### Alternative Execution Methods

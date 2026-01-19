@@ -119,7 +119,7 @@ def main() -> None:
         help="The directory where exported files will be saved",
     )
 
-    # Media type filters (for SMS export only)
+    # Media type filters (for sms-mms-media export only)
     parser.add_argument(
         "--no-images",
         action="store_false",
@@ -151,21 +151,11 @@ def main() -> None:
     input_path = normalize_path(args.input_dir)
     output_dir = normalize_path(args.output_dir)
 
-    # If input is a file, extract its directory
-    # This allows users to specify either a directory or a single file
-    if os.path.isfile(input_path):
-        input_dir = os.path.dirname(input_path)
-        print(f"Note: Input is a file. Using parent directory: {input_dir}")
-    elif os.path.isdir(input_path):
-        input_dir = input_path
-    else:
-        # Path doesn't exist - let the export functions handle the error
-        input_dir = input_path
-
     # Route to appropriate export function based on backup type
+    # Pass the input_path directly - extraction functions will handle files vs directories
     if args.backup_type == "sms-mms-media":
         mms_media_extractor.reconstruct_mms_media(
-            input_dir,
+            input_path,
             output_dir,
             args.process_images,
             args.process_videos,
@@ -173,11 +163,11 @@ def main() -> None:
             args.process_pdfs,
         )
     elif args.backup_type == "sms-mms-text":
-        sms_text_extractor.extract_sms_messages(input_dir, output_dir)
+        sms_text_extractor.extract_sms_messages(input_path, output_dir)
     elif args.backup_type == "calls":
-        call_log_generator.create_call_log(input_dir, output_dir)
+        call_log_generator.create_call_log(input_path, output_dir)
     elif args.backup_type == "vcf":
-        contacts_vcard_extractor.parse_contacts_from_vcf_files(input_dir, output_dir)
+        contacts_vcard_extractor.parse_contacts_from_vcf_files(input_path, output_dir)
 
 
 if __name__ == "__main__":

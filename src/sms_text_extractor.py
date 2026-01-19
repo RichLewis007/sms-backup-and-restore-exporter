@@ -20,34 +20,54 @@ def extract_sms_messages(sms_xml_dir: str, output_dir: str) -> None:
     """
     Extract SMS text messages and MMS text bodies from SMS Backup & Restore XML files.
 
-    Processes all XML files starting with 'sms' in the input directory,
-    extracts SMS text messages and MMS text bodies, and writes them to a CSV file.
+    Processes either a single XML file or all XML files starting with 'sms' in a directory.
+    Extracts SMS text messages and MMS text bodies, and writes them to a CSV file.
 
     Args:
-        sms_xml_dir: Directory containing SMS backup XML files
+        sms_xml_dir: Directory containing SMS backup XML files, or a single XML file path
         output_dir: Directory where sms_messages.csv will be written
     """
     all_messages = []
 
     if not os.path.exists(sms_xml_dir):
-        print(f"Error: Input directory does not exist: {sms_xml_dir}")
-        print("Please provide a valid directory path containing SMS backup XML files.")
+        print(f"Error: Input path does not exist: {sms_xml_dir}")
+        print("Please provide a valid directory or file path containing SMS backup XML files.")
         return
 
-    if not os.path.isdir(sms_xml_dir):
-        print(f"Error: Input path is not a directory: {sms_xml_dir}")
+    try:
+        os.makedirs(output_dir, exist_ok=True)
+    except OSError as e:
+        print(f"Error: Cannot create output directory '{output_dir}': {e}")
+        print("Please check that:")
+        print("  - The path is correct and writable")
+        print("  - You have permission to create directories in the parent location")
+        print("  - The path doesn't point to a read-only file system")
         return
-
-    os.makedirs(output_dir, exist_ok=True)
     num_sms = 0
     num_mms_text = 0
 
-    # Process each SMS backup XML file
-    for filename in os.listdir(sms_xml_dir):
-        if not (filename.endswith(".xml") and filename.startswith("sms")):
-            continue
+    # Determine files to process - single file or all matching files in directory
+    files_to_process = []
+    if os.path.isfile(sms_xml_dir):
+        # Single file specified - use only that file if it matches pattern
+        if sms_xml_dir.endswith(".xml") and os.path.basename(sms_xml_dir).startswith("sms"):
+            files_to_process = [sms_xml_dir]
+        else:
+            print(f"Error: Input file '{sms_xml_dir}' does not match expected pattern (should be 'sms*.xml').")
+            return
+    elif os.path.isdir(sms_xml_dir):
+        # Directory specified - process all matching files
+        for filename in os.listdir(sms_xml_dir):
+            if not (filename.endswith(".xml") and filename.startswith("sms")):
+                continue
+            file_path = os.path.join(sms_xml_dir, filename)
+            files_to_process.append(file_path)
+    else:
+        print(f"Error: Input path is neither a file nor a directory: {sms_xml_dir}")
+        return
 
-        file_path = os.path.join(sms_xml_dir, filename)
+    # Process each SMS backup XML file
+    for file_path in files_to_process:
 
         # Use iterparse for memory-efficient XML parsing
         context = lxml.etree.iterparse(

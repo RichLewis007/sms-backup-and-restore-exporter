@@ -162,7 +162,15 @@ def is_valid_output_directory(output_media_dir: str) -> bool:
         True if directory is valid and ready, False otherwise
     """
     if not os.path.exists(output_media_dir):
-        os.makedirs(output_media_dir, exist_ok=True)
+        try:
+            os.makedirs(output_media_dir, exist_ok=True)
+        except OSError as e:
+            print(f"Error: Cannot create output directory '{output_media_dir}': {e}")
+            print("Please check that:")
+            print("  - The path is correct and writable")
+            print("  - You have permission to create directories in the parent location")
+            print("  - The path doesn't point to a read-only file system")
+            return False
         return True
 
     if not os.path.isdir(output_media_dir):
@@ -189,12 +197,12 @@ def reconstruct_mms_media(
     """
     Extract media attachments from SMS Backup & Restore XML files.
 
-    Processes all XML files starting with 'sms' in the input directory,
-    extracts Base64-encoded media attachments, and saves them as binary files.
+    Processes either a single XML file or all XML files starting with 'sms' in a directory.
+    Extracts Base64-encoded media attachments and saves them as binary files.
     Duplicate files (by content hash) and empty files are removed after extraction.
 
     Args:
-        sms_xml_dir: Directory containing SMS backup XML files
+        sms_xml_dir: Directory containing SMS backup XML files, or a single XML file path
         output_media_dir: Directory where extracted media files will be saved
         process_image: Whether to extract image files
         process_video: Whether to extract video files
@@ -205,12 +213,8 @@ def reconstruct_mms_media(
         return
 
     if not os.path.exists(sms_xml_dir):
-        print(f"Error: Input directory does not exist: {sms_xml_dir}")
-        print("Please provide a valid directory path containing SMS backup XML files.")
-        return
-
-    if not os.path.isdir(sms_xml_dir):
-        print(f"Error: Input path is not a directory: {sms_xml_dir}")
+        print(f"Error: Input path does not exist: {sms_xml_dir}")
+        print("Please provide a valid directory or file path containing SMS backup XML files.")
         return
 
     start_time = time.time()
@@ -230,12 +234,28 @@ def reconstruct_mms_media(
     content_msg = f"Processing messages ({', '.join(media_types)})..."
     print(content_msg, end="", flush=True)
 
-    # Process each SMS backup XML file
-    for filename in os.listdir(sms_xml_dir):
-        if not (filename.endswith(".xml") and filename.startswith("sms")):
-            continue
+    # Determine files to process - single file or all matching files in directory
+    files_to_process = []
+    if os.path.isfile(sms_xml_dir):
+        # Single file specified - use only that file if it matches pattern
+        if sms_xml_dir.endswith(".xml") and os.path.basename(sms_xml_dir).startswith("sms"):
+            files_to_process = [sms_xml_dir]
+        else:
+            print(f"\nError: Input file '{sms_xml_dir}' does not match expected pattern (should be 'sms*.xml').")
+            return
+    elif os.path.isdir(sms_xml_dir):
+        # Directory specified - process all matching files
+        for filename in os.listdir(sms_xml_dir):
+            if not (filename.endswith(".xml") and filename.startswith("sms")):
+                continue
+            file_path = os.path.join(sms_xml_dir, filename)
+            files_to_process.append(file_path)
+    else:
+        print(f"Error: Input path is neither a file nor a directory: {sms_xml_dir}")
+        return
 
-        file_path = os.path.join(sms_xml_dir, filename)
+    # Process each SMS backup XML file
+    for file_path in files_to_process:
 
         # Use iterparse for memory-efficient XML parsing
         context = lxml.etree.iterparse(
