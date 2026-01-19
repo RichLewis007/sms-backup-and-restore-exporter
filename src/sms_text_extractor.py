@@ -66,6 +66,11 @@ def extract_sms_messages(sms_xml_dir: str, output_dir: str) -> None:
         print(f"Error: Input path is neither a file nor a directory: {sms_xml_dir}")
         return
 
+    if not files_to_process:
+        print("No SMS backup XML files found to process.")
+        print("Please ensure your input path contains files matching 'sms*.xml' pattern.")
+        return
+
     # Process each SMS backup XML file
     for file_path in files_to_process:
 
@@ -147,6 +152,7 @@ def extract_sms_messages(sms_xml_dir: str, output_dir: str) -> None:
 
     if not all_messages:
         print("No SMS messages or MMS text bodies found to export.")
+        print("The input XML files do not contain any SMS messages or MMS text content.")
         return
 
     # Write CSV with proper newline handling for cross-platform compatibility

@@ -254,6 +254,11 @@ def reconstruct_mms_media(
         print(f"Error: Input path is neither a file nor a directory: {sms_xml_dir}")
         return
 
+    if not files_to_process:
+        print("\nNo SMS backup XML files found to process.")
+        print("Please ensure your input path contains files matching 'sms*.xml' pattern.")
+        return
+
     # Process each SMS backup XML file
     for file_path in files_to_process:
 
@@ -360,12 +365,21 @@ def reconstruct_mms_media(
 
     print("complete.", flush=True)
 
+    # Check if any files were extracted
+    if orig_files_count == 0:
+        print(f"\nNo media files found to extract from the input files.")
+        print("This could mean:")
+        print("  - The XML files don't contain any MMS messages with media attachments")
+        print("  - All media types are filtered out (check --no-images, --no-videos, etc.)")
+        print("  - The XML files are empty or don't match the expected format")
+        return
+
     # Remove duplicates and empty files after extraction
     num_dup_files = remove_duplicate_files(output_media_dir)
     end_time = time.time()
 
     print(
-        f"{orig_files_count} media files found in messages, "
+        f"\n{orig_files_count} media files found in messages, "
         f"{num_dup_files} duplicates (or empty files) removed. "
         f"Time elapsed: {round(end_time - start_time, 2)} seconds"
     )

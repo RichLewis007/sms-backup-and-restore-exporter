@@ -301,4 +301,11 @@ def parse_contacts_from_vcf_files(vcf_files_dir: str, output_media_dir: str) -> 
             print(f"Unexpected error parsing {filename}: {e}")
             continue
 
+    if not all_contacts:
+        print("No contacts found in VCF files.")
+        print("Please check that:")
+        print("  - The VCF files contain valid vCard data")
+        print("  - The files are not empty or corrupted")
+        return
+
     print(f"Total contacts parsed: {len(all_contacts)}")

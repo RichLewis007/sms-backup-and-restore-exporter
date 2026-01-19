@@ -138,6 +138,11 @@ def create_call_log(calls_xml_dir: str, output_dir: Optional[str] = None) -> Non
         print(f"Error: Input path is neither a file nor a directory: {calls_xml_dir}")
         return
 
+    if not files_to_process:
+        print("No call backup XML files found to process.")
+        print("Please ensure your input path contains files matching 'calls*.xml' pattern.")
+        return
+
     # Process each call backup XML file
     for file_path in files_to_process:
 
@@ -246,7 +251,8 @@ def create_call_log(calls_xml_dir: str, output_dir: Optional[str] = None) -> Non
     output_file = os.path.join(output_dir, "call_log.csv")
 
     if not all_calls_list:
-        print("No calls found to write to call log.")
+        print("No calls found to export.")
+        print("The input XML files do not contain any call records, or all calls were filtered out.")
         return
 
     # Write CSV with proper newline handling for cross-platform compatibility
